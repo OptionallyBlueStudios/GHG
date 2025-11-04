@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GHG — Save Editor</title>
+  <style>
+    /* --- Theme (lightly adapted from user's markup) --- */
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#0a0e14;font-family:'Courier New',monospace;color:#00ff41;min-height:100vh}
+    header{background:linear-gradient(135deg,#1a1f2e 0%,#0f1419 100%);border-bottom:2px solid #00ff41;padding:1rem 1.5rem}
+    .header-content{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+    .logo-section h1{color:#00ff41;font-size:1.4rem;font-weight:700;letter-spacing:2px}
+    .logo-section h1::before{content:"root@";color:#ff0055}
+    nav{display:flex;gap:1rem}
+    nav a{color:#00ff41;text-decoration:none;padding:0.3rem 0.6rem;border:1px solid transparent}
+
+    /* page layout */
+    .container{max-width:1200px;margin:2rem auto;padding:0 1rem}
+    .panel{background:#0f1419;border:1px solid #1a1f2e;border-radius:8px;padding:1rem;margin-bottom:1rem}
+    .panel h2{color:#00ff41;margin-bottom:0.5rem}
+    .controls{display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.75rem}
+    .controls label{font-size:0.85rem;color:#6c7a89}
+    .btn{background:transparent;border:1px solid #00ff41;padding:0.4rem 0.7rem;border-radius:6px;color:#00ff41;cursor:pointer}
+    .btn.secondary{border-color:#00d4ff;color:#00d4ff}
+    input[type=file]{display:none}
+    .file-label{display:inline-block;cursor:pointer}
+
+    .editor-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .editor{height:420px;overflow:auto;border-radius:6px;padding:0.6rem;background:#071018;border:1px solid #0e1520}
+    textarea.editor-area{width:100%;height:100%;resize:none;background:transparent;border:none;color:#cfeee9;font-family:monospace;font-size:0.9rem}
+    .meta{color:#6c7a89;font-size:0.85rem;margin-bottom:0.5rem}
+
+    .search-row{display:flex;gap:0.5rem;align-items:center}
+    input[type=text], select{background:#071018;border:1px solid #1a1f2e;padding:0.5rem;border-radius:6px;color:#00ff41}
+
+    .result-list{max-height:160px;overflow:auto;margin-top:0.5rem;border-top:1px dashed #1a1f2e;padding-top:0.5rem}
+    .result-item{padding:0.35rem 0.25rem;border-bottom:1px solid rgba(255,255,255,0.01);font-size:0.9rem}
+
+    footer{max-width:1200px;margin:0 auto;color:#6c7a89;font-size:0.85rem;text-align:center}
+
+    @media(max-width:900px){.editor-wrap{grid-template-columns:1fr}} 
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo-section"><h1>GHG</h1><p style="color:#6c7a89;font-size:0.85rem;margin-top:0.2rem">// Save Editor</p></div>
+      <nav>
+        <a href="#">[ HOME ]</a>
+        <a href="">[ POSTS ]</a>
+        <a href="#">[ TOOLS ]</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="panel">
+      <h2>&gt;_ Upload & Overview</h2>
+      <div class="controls">
+        <label class="file-label btn" for="file-input">⤓ Choose save file</label>
+        <input id="file-input" type="file" />
+
+        <button id="download-btn" class="btn secondary">⤓ Export edited save</button>
+
+        <select id="type-select">
+          <option value="auto">Auto-detect</option>
+          <option value="json">JSON / Text</option>
+          <option value="binary">Generic Binary (hex)</option>
+          <option value="es3s">ES3S (requires parser)</option>
+        </select>
+
+        <div style="flex:1"></div>
+        <div class="meta">Supported: JSON, plain text, generic binary. ES3S supported only via user-provided parser (see bottom).</div>
+      </div>
+
+      <div class="search-row">
+        <input id="search-input" type="text" placeholder="Search keys / values / hex (e.g. 4a 00 ff or playerName)" style="flex:1" />
+        <button id="search-btn" class="btn">Search</button>
+        <button id="clear-btn" class="btn">Clear</button>
+      </div>
+
+      <div class="result-list" id="results"></div>
+    </div>
+
+    <div class="panel">
+      <h2>&gt;_ Editor</h2>
+      <div class="editor-wrap">
+        <div class="editor" id="left-pane">
+          <div style="font-size:0.9rem;margin-bottom:0.4rem;color:#6c7a89">Text / JSON view (editable)</div>
+          <textarea id="text-editor" class="editor-area" spellcheck="false"></textarea>
+        </div>
+
+        <div class="editor" id="right-pane">
+          <div style="font-size:0.9rem;margin-bottom:0.4rem;color:#6c7a89">Hex view (editable)</div>
+          <textarea id="hex-editor" class="editor-area" spellcheck="false"></textarea>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0.5rem;margin-top:0.6rem">
+        <button id="apply-text" class="btn">Apply text → binary</button>
+        <button id="apply-hex" class="btn">Apply hex → text</button>
+        <button id="pretty-json" class="btn">Pretty JSON</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>&gt;_ ES3S Parser (optional)</h2>
+      <p class="meta">If you need ES3S support, paste a parser function that accepts an ArrayBuffer and returns an object {type: 'json'|'binary', data: ArrayBuffer | string}. For safety & legality: do not paste or request proprietary decryption code — this area is for your own parsers.</p>
+      <textarea id="es3s-parser" class="editor-area" style="height:160px">// Example parser skeleton
+// window.es3sParser = async function (arrayBuffer) {
+//   // parse arrayBuffer and return {type: 'json', data: JSON.stringify(myObject)}
+//   throw new Error('No ES3S parser installed. Paste parser here.');
+// };
+</textarea>
+      <div style="margin-top:0.6rem;display:flex;gap:0.5rem">
+        <button id="load-parser" class="btn">Load parser (eval)</button>
+        <button id="clear-parser" class="btn">Clear parser</button>
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="padding:1.2rem 1rem">© 2025 GHG — Save Editor | For educational & personal backup use only. Do not use to abuse online multiplayer or bypass DRM.</footer>
+
+  <script>
+    // --- utility functions ---
+    const fileInput = document.getElementById('file-input');
+    const textEditor = document.getElementById('text-editor');
+    const hexEditor = document.getElementById('hex-editor');
+    const searchInput = document.getElementById('search-input');
+    const resultsDiv = document.getElementById('results');
+    const typeSelect = document.getElementById('type-select');
+    const downloadBtn = document.getElementById('download-btn');
+
+    let currentArrayBuffer = null;
+    let currentFileName = 'edited_save.bin';
+
+    function ab2hex(buffer){
+      const bytes = new Uint8Array(buffer);
+      let s = '';
+      for(let i=0;i<bytes.length;i++){
+        s += bytes[i].toString(16).padStart(2,'0') + (i%16===15 ? '\n' : ' ');
+      }
+      return s.trim();
+    }
+
+    function hex2ab(hex){
+      const cleaned = hex.replace(/[^0-9a-f]/gi,'');
+      if(cleaned.length%2) throw new Error('Hex length invalid');
+      const len = cleaned.length/2;
+      const ab = new Uint8Array(len);
+      for(let i=0;i<len;i++) ab[i]=parseInt(cleaned.substr(i*2,2),16);
+      return ab.buffer;
+    }
+
+    function tryParseText(bytes){
+      try{
+        const decoder = new TextDecoder();
+        return decoder.decode(bytes);
+      }catch(e){return null}
+    }
+
+    async function readFile(file){
+      currentFileName = file.name || currentFileName;
+      const ab = await file.arrayBuffer();
+      currentArrayBuffer = ab;
+      const bytes = new Uint8Array(ab);
+
+      // detection
+      const forced = typeSelect.value;
+      if(forced === 'json'){
+        const text = tryParseText(bytes);
+        textEditor.value = text || '';
+      } else if(forced === 'binary'){
+        hexEditor.value = ab2hex(ab);
+        textEditor.value = '';
+      } else if(forced === 'es3s'){
+        if(window.es3sParser){
+          try{
+            const parsed = await window.es3sParser(ab);
+            if(parsed.type === 'json'){
+              textEditor.value = parsed.data;
+            } else if(parsed.type === 'binary'){
+              currentArrayBuffer = parsed.data instanceof ArrayBuffer ? parsed.data : parsed.data.buffer;
+              hexEditor.value = ab2hex(currentArrayBuffer);
+            }
+          }catch(err){
+            alert('ES3S parser error: ' + err.message);
+          }
+        }else{
+          alert('No ES3S parser loaded. Paste one in the ES3S parser box and click "Load parser".');
+        }
+      } else {
+        // auto-detect: try text/json
+        const text = tryParseText(bytes);
+        if(text && (text.trim().startsWith('{') || text.trim().startsWith('[') || /[\w\s]+:/.test(text.substr(0,200)))){
+          textEditor.value = text;
+          try{JSON.parse(text);}catch(e){}
+        } else {
+          hexEditor.value = ab2hex(ab);
+          textEditor.value = '';
+        }
+      }
+
+      renderResults('');
+    }
+
+    fileInput.addEventListener('change',e=>{
+      const f = e.target.files[0];
+      if(f) readFile(f);
+    });
+
+    document.querySelector('.file-label').addEventListener('click',()=>fileInput.click());
+
+    // search
+    document.getElementById('search-btn').addEventListener('click',()=>renderResults(searchInput.value));
+    document.getElementById('clear-btn').addEventListener('click',()=>{searchInput.value='';renderResults('');});
+
+    function renderResults(query){
+      resultsDiv.innerHTML='';
+      if(!currentArrayBuffer && !textEditor.value && !hexEditor.value) return;
+      const q = (query||'').trim();
+      if(textEditor.value){
+        // search JSON/text
+        const txt = textEditor.value;
+        if(!q){
+          resultsDiv.innerHTML = '<div class="result-item">Text loaded — length: '+txt.length+'</div>';
+          return;
+        }
+        try{
+          const obj = JSON.parse(txt);
+          const matches = [];
+          const walk = (o,path)=>{
+            if(typeof o === 'object' && o!==null){
+              for(const k in o) walk(o[k], path ? path+"."+k : k);
+            } else {
+              const vv = String(o);
+              if(vv.toLowerCase().includes(q.toLowerCase())) matches.push({path, value: vv});
+            }
+          };
+          walk(obj,'');
+          if(matches.length===0) resultsDiv.innerHTML='<div class="result-item">No JSON matches</div>';
+          else matches.slice(0,200).forEach(m=>{
+            const d = document.createElement('div'); d.className='result-item'; d.textContent = m.path + ' = ' + m.value; resultsDiv.appendChild(d);
+          });
+        }catch(e){
+          // plain text search
+          const lines = txt.split(/\n/);
+          const matches = lines.map((l,i)=>({i,l})).filter(x=>x.l.toLowerCase().includes(q.toLowerCase()));
+          if(matches.length===0) resultsDiv.innerHTML='<div class="result-item">No text matches</div>';
+          else matches.forEach(m=>{const d=document.createElement('div');d.className='result-item';d.textContent = (m.i+1)+': '+m.l;resultsDiv.appendChild(d)});
+        }
+        return;
+      }
+
+      // hex search
+      const hex = hexEditor.value.replace(/[^0-9a-f]/gi,'');
+      if(!hex){resultsDiv.innerHTML='<div class="result-item">No hex data loaded</div>';return}
+      if(!q){resultsDiv.innerHTML='<div class="result-item">Hex length: '+(hex.length/2)+' bytes</div>';return}
+      // allow queries like "4a 00 ff" or text
+      const qClean = q.replace(/[^0-9a-f\s]/gi,'');
+      if(/[0-9a-f]/i.test(qClean)){
+        const needle = qClean.replace(/\s+/g,'');
+        const idx = hex.indexOf(needle);
+        if(idx===-1) resultsDiv.innerHTML='<div class="result-item">Hex sequence not found</div>';
+        else resultsDiv.innerHTML='<div class="result-item">Found at byte offset '+(idx/2)+'</div>';
+      } else {
+        // text search in hex: convert hex to text and search
+        try{
+          const ab = hex2ab(hex);
+          const text = new TextDecoder().decode(ab);
+          const idx = text.toLowerCase().indexOf(q.toLowerCase());
+          if(idx===-1) resultsDiv.innerHTML='<div class="result-item">Text not found in binary</div>';
+          else resultsDiv.innerHTML='<div class="result-item">Found text at byte offset '+idx+'</div>';
+        }catch(e){resultsDiv.innerHTML='<div class="result-item">Search failed: '+e.message+'</div>'}
+      }
+    }
+
+    // syncing editors
+    document.getElementById('apply-text').addEventListener('click',()=>{
+      // encode text editor -> replace binary
+      const text = textEditor.value;
+      const ab = new TextEncoder().encode(text).buffer;
+      currentArrayBuffer = ab;
+      hexEditor.value = ab2hex(ab);
+      renderResults('');
+    });
+    document.getElementById('apply-hex').addEventListener('click',()=>{
+      try{
+        const ab = hex2ab(hexEditor.value);
+        currentArrayBuffer = ab;
+        const dec = tryParseText(new Uint8Array(ab));
+        textEditor.value = dec || '';
+        renderResults('');
+      }catch(e){alert('Hex -> binary failed: '+e.message)}
+    });
+
+    document.getElementById('pretty-json').addEventListener('click',()=>{
+      try{const obj = JSON.parse(textEditor.value); textEditor.value = JSON.stringify(obj,null,2);}catch(e){alert('Not valid JSON')}
+    });
+
+    // download/export
+    downloadBtn.addEventListener('click',()=>{
+      if(!currentArrayBuffer){
+        // try to create from text or hex
+        if(textEditor.value) currentArrayBuffer = new TextEncoder().encode(textEditor.value).buffer;
+        else if(hexEditor.value) currentArrayBuffer = hex2ab(hexEditor.value);
+        else {alert('No data to export');return}
+      }
+      const blob = new Blob([currentArrayBuffer],{type:'application/octet-stream'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = currentFileName.replace(/\.[^\.]+$/,'') + '_edited.bin';
+      document.body.appendChild(a); a.click(); a.remove();
+    });
+
+    // load/parser management (user-supplied parser via eval)
+    document.getElementById('load-parser').addEventListener('click',()=>{
+      const code = document.getElementById('es3s-parser').value;
+      try{
+        // eslint-disable-next-line no-eval
+        eval(code);
+        if(typeof window.es3sParser !== 'function') throw new Error('es3sParser function not present after eval');
+        alert('Parser loaded. Select ES3S in the type dropdown and re-open the file.');
+      }catch(e){alert('Parser load failed: '+e.message)}
+    });
+    document.getElementById('clear-parser').addEventListener('click',()=>{delete window.es3sParser;alert('Parser cleared');});
+
+    // safety: do not provide any decryption helpers for proprietary formats
+    // If user tries to request help to bypass DRM/anti-cheat, we will refuse. This editor is for personal backup/education.
+
+    // small UX: enable dropping
+    window.addEventListener('dragover',e=>{e.preventDefault();});
+    window.addEventListener('drop',e=>{e.preventDefault(); if(e.dataTransfer.files.length) readFile(e.dataTransfer.files[0]);});
+
+    // initialise: sample placeholder
+    textEditor.value='';hexEditor.value='';
+  </script>
+</body>
+</html>
