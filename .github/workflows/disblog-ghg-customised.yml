@@ -37,9 +37,15 @@ jobs:
             section_name="General"
           fi
           
-          # Create slugs properly (don't reuse GitHub's full slug)
+          # Create slugs properly (don't reuse full slug in category, use section + category)
           section_slug=$(echo "$section_name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g')
           category_slug=$(echo "$category_name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g')
+          
+          # Ensure the directory structure is properly created:
+          post_dir="posts/$section_slug/$category_slug"  # Correctly nested: section/category
+          mkdir -p "$post_dir"
+          post_file="$post_dir/${{ steps.discussion.outputs.number }}.html"
+
 
           # Create slugs
           section_slug=$(echo "$section_name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g')
