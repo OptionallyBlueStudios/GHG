@@ -1,16 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>GHG - The Game Hacking Guide</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background-color: #0a0e14;
             font-family: 'Courier New', monospace;
@@ -18,343 +13,79 @@
             line-height: 1.6;
             min-height: 100vh;
         }
-
-        /* Terminal-style header */
         header {
             background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
             border-bottom: 2px solid #00ff41;
             padding: 1.5rem 2rem;
             box-shadow: 0 4px 20px rgba(0, 255, 65, 0.1);
         }
+        .header-content { max-width: 1200px; margin: 0 auto; display:flex; justify-content:space-between; align-items:center; }
+        .logo-section h1 { color:#00ff41; font-size:1.8rem; font-weight:700; text-shadow:0 0 10px rgba(0,255,65,0.5); letter-spacing:2px;}
+        .logo-section h1::before { content:"root@"; color:#ff0055; }
+        .logo-section p { color: #6c7a89; font-size:0.9rem; margin-top:0.3rem; }
+        nav { display:flex; gap:2rem; }
+        nav a { color:#00ff41; text-decoration:none; padding:0.5rem 1rem; border:1px solid transparent; transition:all .3s ease; font-size:0.95rem; }
+        nav a:hover { border:1px solid #00ff41; background:rgba(0,255,65,0.1); box-shadow:0 0 15px rgba(0,255,65,0.3); }
 
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        /* Hero */
+        .hero { max-width:1200px; margin:4rem auto; padding:0 2rem; text-align:center; }
+        .hero h1 { font-size:3rem; color:#00ff41; text-shadow:0 0 20px rgba(0,255,65,0.6); margin-bottom:1rem; animation:glow 2s ease-in-out infinite alternate; }
+        @keyframes glow { from { text-shadow:0 0 10px rgba(0,255,65,0.4);} to { text-shadow:0 0 20px rgba(0,255,65,0.8), 0 0 30px rgba(0,255,65,0.4);} }
+        .hero p { font-size:1.2rem; color:#6c7a89; max-width:700px; margin:0 auto 2rem; }
+        .hero-stats { display:flex; justify-content:center; gap:3rem; margin-top:3rem; flex-wrap:wrap; }
+        .stat-box { background:#0f1419; border:1px solid #1a1f2e; border-radius:8px; padding:1.5rem 2rem; min-width:150px; transition:all .3s ease; }
+        .stat-box:hover { border-color:#00ff41; box-shadow:0 0 20px rgba(0,255,65,0.2); transform:translateY(-5px); }
+        .stat-box .number { font-size:2.5rem; color:#ff0055; font-weight:bold; display:block; }
+        .stat-box .label { color:#6c7a89; font-size:0.9rem; margin-top:0.5rem; }
 
-        .logo-section h1 {
-            color: #00ff41;
-            font-size: 1.8rem;
-            font-weight: 700;
-            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
-            letter-spacing: 2px;
-        }
-
-        .logo-section h1::before {
-            content: "root@";
-            color: #ff0055;
-        }
-
-        .logo-section p {
-            color: #6c7a89;
-            font-size: 0.9rem;
-            margin-top: 0.3rem;
-        }
-
-        nav {
-            display: flex;
-            gap: 2rem;
-        }
-
-        nav a {
-            color: #00ff41;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border: 1px solid transparent;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-        }
-
-        nav a:hover {
-            border: 1px solid #00ff41;
-            background: rgba(0, 255, 65, 0.1);
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
-        }
-
-        /* Hero Section */
-        .hero {
-            max-width: 1200px;
-            margin: 4rem auto;
-            padding: 0 2rem;
-            text-align: center;
-        }
-
-        .hero h1 {
-            font-size: 3rem;
-            color: #00ff41;
-            text-shadow: 0 0 20px rgba(0, 255, 65, 0.6);
-            margin-bottom: 1rem;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from {
-                text-shadow: 0 0 10px rgba(0, 255, 65, 0.4);
-            }
-            to {
-                text-shadow: 0 0 20px rgba(0, 255, 65, 0.8), 0 0 30px rgba(0, 255, 65, 0.4);
-            }
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            color: #6c7a89;
-            max-width: 700px;
-            margin: 0 auto 2rem;
-        }
-
-        .hero-stats {
-            display: flex;
-            justify-content: center;
-            gap: 3rem;
-            margin-top: 3rem;
-            flex-wrap: wrap;
-        }
-
-        .stat-box {
-            background: #0f1419;
-            border: 1px solid #1a1f2e;
-            border-radius: 8px;
-            padding: 1.5rem 2rem;
-            min-width: 150px;
-            transition: all 0.3s ease;
-        }
-
-        .stat-box:hover {
-            border-color: #00ff41;
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
-            transform: translateY(-5px);
-        }
-
-        .stat-box .number {
-            font-size: 2.5rem;
-            color: #ff0055;
-            font-weight: bold;
-            display: block;
-        }
-
-        .stat-box .label {
-            color: #6c7a89;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-
-        /* Main content container */
-        .container {
-            max-width: 1200px;
-            margin: 3rem auto;
-            padding: 0 2rem;
-        }
-
-        /* Section headers */
-        .section-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 2rem;
-            gap: 1rem;
-        }
-
-        .section-header h2 {
-            color: #00ff41;
-            font-size: 1.8rem;
-            text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
-        }
-
-        .section-header::after {
-            content: "";
-            flex: 1;
-            height: 2px;
-            background: linear-gradient(to right, #00ff41, transparent);
-        }
+        /* Container + sections */
+        .container { max-width:1200px; margin:3rem auto; padding:0 2rem; }
+        .section-header { display:flex; align-items:center; margin-bottom:2rem; gap:1rem; }
+        .section-header h2 { color:#00ff41; font-size:1.8rem; text-shadow:0 0 5px rgba(0,255,65,0.3); }
+        .section-header::after { content:""; flex:1; height:2px; background:linear-gradient(to right,#00ff41,transparent); }
 
         /* Posts grid */
-        .posts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 2rem;
-            margin-bottom: 4rem;
-        }
-
+        .posts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(350px,1fr)); gap:2rem; margin-bottom:4rem; }
         .post-card {
-            background: #0f1419;
-            border: 1px solid #1a1f2e;
-            border-radius: 8px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
+            background:#0f1419; border:1px solid #1a1f2e; border-radius:8px; padding:1.5rem; transition:all .3s ease; cursor:pointer;
+            display:flex; flex-direction:column; justify-content:space-between;
         }
+        .post-card:hover { border-color:#00ff41; box-shadow:0 8px 30px rgba(0,255,65,0.15); transform:translateY(-5px); }
+        .post-card .category { display:inline-block; background:rgba(255,0,85,0.08); color:#ff0055; padding:0.25rem 0.6rem; border-radius:4px; font-size:0.85rem; margin-bottom:0.75rem; border:1px solid rgba(255,0,85,0.18); width:max-content; }
+        .post-card h3 { color:#00ff41; font-size:1.25rem; margin-bottom:0.6rem; }
+        .post-card .excerpt { color:#a0a0a0; font-size:0.95rem; line-height:1.6; margin-bottom:1rem; min-height:3.2em; }
+        .post-card .meta { display:flex; justify-content:space-between; color:#6c7a89; font-size:0.85rem; padding-top:1rem; border-top:1px solid #1a1f2e; gap:1rem; align-items:center; }
 
-        .post-card:hover {
-            border-color: #00ff41;
-            box-shadow: 0 8px 30px rgba(0, 255, 65, 0.15);
-            transform: translateY(-5px);
-        }
+        /* categories */
+        .categories-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:1.5rem; margin-bottom:2rem; }
+        .category-card { background:#0f1419; border:1px solid #1a1f2e; border-radius:8px; padding:1.5rem; text-align:center; transition:all .3s ease; cursor:pointer; }
+        .category-card:hover { border-color:#00d4ff; box-shadow:0 8px 30px rgba(0,212,255,0.15); transform:translateY(-5px); }
+        .category-card .icon { font-size:2.5rem; margin-bottom:1rem; }
+        .category-card h3 { color:#00d4ff; font-size:1.2rem; margin-bottom:0.5rem; }
+        .category-card .count { color:#6c7a89; font-size:0.9rem; }
 
-        .post-card .category {
-            display: inline-block;
-            background: rgba(255, 0, 85, 0.2);
-            color: #ff0055;
-            padding: 0.3rem 0.8rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            margin-bottom: 1rem;
-            border: 1px solid #ff0055;
-        }
+        /* info/warning boxes */
+        .info-box { background:rgba(0,212,255,0.1); border-left:4px solid #00d4ff; padding:1.5rem; margin:2rem 0; border-radius:4px; }
+        .info-box h3 { color:#00d4ff; margin-bottom:0.8rem; }
+        .info-box p { color:#d4d4d4; line-height:1.8; }
+        .warning-box { background:rgba(255,0,85,0.1); border-left:4px solid #ff0055; padding:1.5rem; margin:2rem 0; border-radius:4px; }
+        .warning-box h3 { color:#ff0055; margin-bottom:0.8rem; }
+        .warning-box p { color:#d4d4d4; line-height:1.8; }
 
-        .post-card h3 {
-            color: #00ff41;
-            font-size: 1.3rem;
-            margin-bottom: 0.8rem;
-        }
+        /* small helpers */
+        .muted { color:#6c7a89; font-size:0.9rem; }
+        .loading { color:#6c7a89; font-size:0.95rem; margin-top:1rem; text-align:center; }
 
-        .post-card .excerpt {
-            color: #a0a0a0;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
+        footer { background:#0f1419; border-top:2px solid #00ff41; padding:2rem; text-align:center; color:#6c7a89; margin-top:4rem; }
+        footer a { color:#00d4ff; text-decoration:none; }
+        footer a:hover { color:#00ff41; text-shadow:0 0 8px rgba(0,255,65,0.5); }
 
-        .post-card .meta {
-            display: flex;
-            justify-content: space-between;
-            color: #6c7a89;
-            font-size: 0.85rem;
-            padding-top: 1rem;
-            border-top: 1px solid #1a1f2e;
-        }
-
-        .post-card .meta span::before {
-            content: "▸ ";
-            color: #00ff41;
-        }
-
-        /* Categories section */
-        .categories-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 4rem;
-        }
-
-        .category-card {
-            background: #0f1419;
-            border: 1px solid #1a1f2e;
-            border-radius: 8px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .category-card:hover {
-            border-color: #00d4ff;
-            box-shadow: 0 8px 30px rgba(0, 212, 255, 0.15);
-            transform: translateY(-5px);
-        }
-
-        .category-card .icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .category-card h3 {
-            color: #00d4ff;
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .category-card .count {
-            color: #6c7a89;
-            font-size: 0.9rem;
-        }
-
-        /* Info box */
-        .info-box {
-            background: rgba(0, 212, 255, 0.1);
-            border-left: 4px solid #00d4ff;
-            padding: 1.5rem;
-            margin: 2rem 0;
-            border-radius: 4px;
-        }
-
-        .info-box h3 {
-            color: #00d4ff;
-            margin-bottom: 0.8rem;
-        }
-
-        .info-box p {
-            color: #d4d4d4;
-            line-height: 1.8;
-        }
-
-        /* Warning box */
-        .warning-box {
-            background: rgba(255, 0, 85, 0.1);
-            border-left: 4px solid #ff0055;
-            padding: 1.5rem;
-            margin: 2rem 0;
-            border-radius: 4px;
-        }
-
-        .warning-box h3 {
-            color: #ff0055;
-            margin-bottom: 0.8rem;
-        }
-
-        .warning-box p {
-            color: #d4d4d4;
-            line-height: 1.8;
-        }
-
-        /* Footer */
-        footer {
-            background: #0f1419;
-            border-top: 2px solid #00ff41;
-            padding: 2rem;
-            text-align: center;
-            color: #6c7a89;
-            margin-top: 4rem;
-        }
-
-        footer a {
-            color: #00d4ff;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            color: #00ff41;
-            text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-
-            nav {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .hero h1 {
-                font-size: 2rem;
-            }
-
-            .hero-stats {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .posts-grid,
-            .categories-grid {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width:768px) {
+            .header-content { flex-direction:column; gap:1rem; text-align:center; }
+            nav { flex-direction:column; gap:0.5rem; }
+            .hero h1 { font-size:2rem; }
+            .hero-stats { flex-direction:column; gap:1rem; }
+            .posts-grid, .categories-grid { grid-template-columns:1fr; }
         }
     </style>
 </head>
@@ -377,20 +108,10 @@
     <div class="hero" id="about">
         <h1>Welcome to GHG</h1>
         <p>Your comprehensive guide to game hacking, modding, and reverse engineering.</p>
-        
         <div class="hero-stats">
-            <div class="stat-box">
-                <span class="number">50+</span>
-                <span class="label">Tutorials</span>
-            </div>
-            <div class="stat-box">
-                <span class="number">15+</span>
-                <span class="label">Tools</span>
-            </div>
-            <div class="stat-box">
-                <span class="number">10+</span>
-                <span class="label">Categories</span>
-            </div>
+            <div class="stat-box"><span class="number">50+</span><span class="label">Tutorials</span></div>
+            <div class="stat-box"><span class="number">15+</span><span class="label">Tools</span></div>
+            <div class="stat-box"><span class="number">10+</span><span class="label">Categories</span></div>
         </div>
     </div>
 
@@ -398,7 +119,7 @@
         <div class="warning-box">
             <h3>⚠ Important Legal Notice</h3>
             <p>This site is for educational purposes only. Game hacking techniques should only be used on games you own, in single-player mode, or with explicit permission. Unauthorized modification of online games or circumventing anti-cheat systems is illegal and violates terms of service. Always respect game developers and other players.</p>
-        </div> 
+        </div>
 
         <div class="section-header">
             <h2 id="posts">&gt;_ Browse by Category</h2>
@@ -406,46 +127,247 @@
 
         <div class="categories-grid">
             <div class="category-card" onclick="window.location.href='/category/memory-hacking'">
-                <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-cpu" viewBox="0 0 16 16"><path d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14a2.5 2.5 0 0 1-2.5 2.5v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0m-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5zM6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5z"/></svg></div>
+                <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 16 16"><path d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14a2.5 2.5 0 0 1-2.5 2.5v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0m-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5zM6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5z"/></svg></div>
                 <h3>Memory Hacking</h3>
                 <p class="count">0 posts</p>
             </div>
-
             <div class="category-card" onclick="window.location.href='/category/code-injection'">
-                <div class="icon">💉</div>
-                <h3>Code Injection</h3>
-                <p class="count">0 posts</p>
+                <div class="icon">💉</div><h3>Code Injection</h3><p class="count">0 posts</p>
             </div>
-
             <div class="category-card" onclick="window.location.href='/category/reverse-engineering'">
-                <div class="icon">🔍</div>
-                <h3>Save Editing</h3>
-                <p class="count">0 posts</p>
+                <div class="icon">🔍</div><h3>Save Editing</h3><p class="count">0 posts</p>
             </div>
-
             <div class="category-card" onclick="window.location.href='/category/game-engines'">
-                <div class="icon">🎮</div>
-                <h3>Game Engines</h3>
-                <p class="count">0 posts</p>
+                <div class="icon">🎮</div><h3>Game Engines</h3><p class="count">0 posts</p>
             </div>
-
             <div class="category-card" onclick="window.location.href='/category/tools'">
-                <div class="icon">🛠️</div>
-                <h3>Tools & Resources</h3>
-                <p class="count">0 posts</p>
+                <div class="icon">🛠️</div><h3>Tools & Resources</h3><p class="count">0 posts</p>
             </div>
-
             <div class="category-card" onclick="window.location.href='/category/anti-cheat'">
-                <div class="icon">🛡️</div>
-                <h3>Bypassing The Anti-Cheat</h3>
-                <p class="count">0 posts</p>
+                <div class="icon">🛡️</div><h3>Bypassing The Anti-Cheat</h3><p class="count">0 posts</p>
             </div>
         </div>
+
+        <!-- Latest posts header -->
+        <div class="section-header">
+            <h2>&gt;_ Latest Posts</h2>
+        </div>
+
+        <!-- Placeholder grid; JS will populate this -->
+        <div id="latest-posts" class="posts-grid">
+            <div class="loading" id="posts-loading">Loading latest posts from sitemap.xml…</div>
+        </div>
+
     </div>
 
     <footer>
         <p>© 2025 GHG - The Game Hacking Guide | Powered by <a href="https://github.com/StuffzEZ/DisBlog">DisBlog</a></p>
-        <p style="margin-top: 0.5rem; font-size: 0.85rem;">For educational purposes only. Always obtain proper authorization.</p>
+        <p style="margin-top:0.5rem; font-size:0.85rem;">For educational purposes only. Always obtain proper authorization.</p>
     </footer>
+
+    <script>
+    (function(){
+        const POSTS_CONTAINER = document.getElementById('latest-posts');
+        const LOADER = document.getElementById('posts-loading');
+        const MAX_DISPLAY = 6; // how many latest posts to show
+
+        // prettify slug: "memory-scanning-basics" -> "Memory Scanning Basics"
+        function prettifySlug(slug){
+            return slug
+                .replace(/\.[^/.]+$/, "") // remove extension
+                .replace(/[-_]+/g, ' ')
+                .split(' ')
+                .map(s => s.length ? s[0].toUpperCase() + s.slice(1) : '')
+                .join(' ');
+        }
+
+        // attempt to extract numeric id from filename: "post-123.html" -> 123
+        function numericFromFilename(filename){
+            const m = filename.match(/(\d{3,}| \d{2,}|\d+)/g);
+            if(!m) return null;
+            // return highest numeric token
+            return Math.max(...m.map(Number));
+        }
+
+        // estimate read time from text (words / 200)
+        function estimateReadTime(text){
+            const words = (text || '').trim().split(/\s+/).filter(Boolean).length;
+            return Math.max(1, Math.round(words / 200));
+        }
+
+        // build a card DOM node
+        function buildCard({href, category, title, excerpt, readTime}) {
+            const card = document.createElement('div');
+            card.className = 'post-card';
+            card.onclick = () => { window.location.href = href; };
+            const cat = document.createElement('span');
+            cat.className = 'category';
+            cat.textContent = category || 'General';
+            const h3 = document.createElement('h3');
+            h3.textContent = title || prettifySlug(href.split('/').pop());
+            const ex = document.createElement('p');
+            ex.className = 'excerpt';
+            ex.textContent = excerpt || '';
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+            const spanLeft = document.createElement('span');
+            spanLeft.textContent = category || '';
+            const spanRight = document.createElement('span');
+            spanRight.textContent = (readTime ? readTime + ' min read' : '');
+            meta.appendChild(spanLeft);
+            meta.appendChild(spanRight);
+            card.appendChild(cat);
+            card.appendChild(h3);
+            card.appendChild(ex);
+            card.appendChild(meta);
+            return card;
+        }
+
+        // parse sitemap XML and return array of {loc, lastmod}
+        function parseSitemap(xmlText){
+            try {
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(xmlText, "application/xml");
+                const urls = Array.from(xml.getElementsByTagName('url'));
+                const entries = urls.map(u => {
+                    const locEl = u.getElementsByTagName('loc')[0];
+                    const lastmodEl = u.getElementsByTagName('lastmod')[0];
+                    return {
+                        loc: locEl ? locEl.textContent.trim() : null,
+                        lastmod: lastmodEl ? lastmodEl.textContent.trim() : null
+                    };
+                }).filter(e => e.loc && e.loc.includes('/posts/'));
+                return entries;
+            } catch (e) {
+                console.warn('Failed to parse sitemap.xml', e);
+                return [];
+            }
+        }
+
+        // fetch a post page and extract title, description or first paragraph
+        async function fetchPostMeta(url){
+            try {
+                const res = await fetch(url, { credentials: 'same-origin' });
+                if(!res.ok) throw new Error('non-ok');
+                const text = await res.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const metaTitle = doc.querySelector('meta[property="og:title"]')?.getAttribute('content')
+                    || doc.querySelector('meta[name="title"]')?.getAttribute('content')
+                    || doc.querySelector('title')?.textContent || null;
+                const metaDesc = doc.querySelector('meta[property="og:description"]')?.getAttribute('content')
+                    || doc.querySelector('meta[name="description"]')?.getAttribute('content') || null;
+                let excerpt = metaDesc;
+                if(!excerpt){
+                    // try first <article> or first <p>
+                    excerpt = doc.querySelector('article p')?.textContent?.trim()
+                        || doc.querySelector('p')?.textContent?.trim() || '';
+                }
+                const bodyText = doc.body ? doc.body.textContent || '' : '';
+                const readTime = estimateReadTime(bodyText);
+                return { title: metaTitle, excerpt: excerpt, readTime };
+            } catch (e) {
+                // fetch blocked (CORS) or network error; fall back
+                return null;
+            }
+        }
+
+        // main loader
+        async function loadLatestFromSitemap(){
+            try {
+                const res = await fetch('sitemap.xml', { cache: 'no-store' });
+                if(!res.ok) throw new Error('sitemap fetch failed: ' + res.status);
+                const xmlText = await res.text();
+                const entries = parseSitemap(xmlText);
+                if(entries.length === 0) {
+                    LOADER.textContent = 'No posts found in sitemap.xml under /posts/.';
+                    return;
+                }
+
+                // convert to enriched list with sortable date/num
+                const enriched = entries.map(e => {
+                    const urlObj = new URL(e.loc, window.location.origin);
+                    // get everything after /posts/
+                    const postsPart = urlObj.pathname.split('/posts/')[1] || '';
+                    const segments = postsPart.split('/').filter(Boolean);
+                    const filename = segments[segments.length - 1] || '';
+                    const category = segments.length >= 2 ? prettifySlug(segments[segments.length - 2]) : (segments[0] ? prettifySlug(segments[0]) : 'General');
+                    // prefer lastmod if present
+                    let sortKey = null;
+                    if(e.lastmod) {
+                        const t = Date.parse(e.lastmod);
+                        if(!isNaN(t)) sortKey = t;
+                    }
+                    // otherwise try numeric id from filename
+                    if(!sortKey) {
+                        const n = numericFromFilename(filename);
+                        if(n) sortKey = n;
+                    }
+                    // fallback to zero
+                    if(!sortKey) sortKey = 0;
+                    return { loc: e.loc, filename, category, sortKey };
+                });
+
+                // sort descending (latest first)
+                enriched.sort((a,b) => b.sortKey - a.sortKey);
+
+                // show top MAX_DISPLAY, gradually try to fetch metadata
+                const top = enriched.slice(0, MAX_DISPLAY);
+
+                // clear loader
+                POSTS_CONTAINER.innerHTML = '';
+
+                // for each, create a placeholder card and then attempt to fetch metadata to enhance
+                for (const item of top) {
+                    const prettyTitle = prettifySlug(item.filename);
+                    const placeholder = buildCard({
+                        href: item.loc,
+                        category: item.category,
+                        title: prettyTitle,
+                        excerpt: 'Loading excerpt…',
+                        readTime: null
+                    });
+                    POSTS_CONTAINER.appendChild(placeholder);
+
+                    // try to fetch full meta (but don't break if it fails)
+                    try {
+                        const meta = await fetchPostMeta(item.loc);
+                        const newTitle = (meta && meta.title) ? meta.title : prettyTitle;
+                        const newExcerpt = (meta && meta.excerpt) ? meta.excerpt : '';
+                        const newRead = (meta && meta.readTime) ? meta.readTime : null;
+                        // replace placeholder with updated card
+                        const updated = buildCard({
+                            href: item.loc,
+                            category: item.category,
+                            title: newTitle,
+                            excerpt: newExcerpt || 'No excerpt available.',
+                            readTime: newRead
+                        });
+                        POSTS_CONTAINER.replaceChild(updated, placeholder);
+                    } catch (e) {
+                        // ignore per-post fetch errors
+                        const fallbackCard = buildCard({
+                            href: item.loc,
+                            category: item.category,
+                            title: prettyTitle,
+                            excerpt: '',
+                            readTime: null
+                        });
+                        POSTS_CONTAINER.replaceChild(fallbackCard, placeholder);
+                    }
+                }
+
+            } catch (err) {
+                console.warn(err);
+                LOADER && (LOADER.textContent = 'Could not load sitemap.xml — check it exists at /sitemap.xml and is accessible.');
+            }
+        }
+
+        // kickoff
+        loadLatestFromSitemap();
+
+    })();
+    </script>
+
 </body>
 </html>
