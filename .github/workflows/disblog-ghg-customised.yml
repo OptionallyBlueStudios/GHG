@@ -36,6 +36,10 @@ jobs:
           else
             section_name="General"
           fi
+          
+          # Create slugs properly (don't reuse GitHub's full slug)
+          section_slug=$(echo "$section_name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g')
+          category_slug=$(echo "$category_name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g')
 
           # Create slugs
           section_slug=$(echo "$section_name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g')
