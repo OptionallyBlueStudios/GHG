@@ -21,27 +21,6 @@ jobs:
         with:
           node-version: '20'
 
-      # ✅ New step: fetch the section name dynamically via GitHub GraphQL API
-      - name: Fetch section info via GitHub API
-        id: fetch_section
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DISCUSSION_ID: ${{ github.event.discussion.node_id }}
-        run: |
-          section_name=$(gh api graphql -f query='
-            query($id:ID!){
-              node(id:$id){
-                ... on Discussion {
-                  category {
-                    section {
-                      name
-                    }
-                  }
-                }
-              }
-            }' -f id="$DISCUSSION_ID" --jq '.data.node.category.section.name // "NoSection"')
-          echo "section_name=$section_name" >> $GITHUB_OUTPUT
-
       - name: Extract Discussion Data and Convert Markdown
         id: discussion
         run: |
@@ -50,23 +29,26 @@ jobs:
           category_name="${{ github.event.discussion.category.name }}"
           category_slug="${{ github.event.discussion.category.slug }}"
           
-          # ✅ Get section name from the previous step
-          section_name="${{ steps.fetch_section.outputs.section_name }}"
-
-          if [ -z "$section_name" ] || [ "$section_name" == "null" ]; then
-            section_name="NoSection"
+          # --- NEW LOGIC: support sections using category path style (e.g. Games/MyGame) ---
+          if [[ "$category_name" == *"/"* ]]; then
+            section_name=$(echo "$category_name" | cut -d'/' -f1 | xargs)
+            category_name=$(echo "$category_name" | cut -d'/' -f2- | xargs)
+          else
+            section_name="General"
           fi
 
-          # Slugify section/category
+          # Create slugs
           section_slug=$(echo "$section_name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g')
           if [ -z "$category_slug" ] || [ "$category_slug" == "null" ]; then
             category_slug=$(echo "$category_name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g')
           fi
           
+          # Create temporary markdown file
           cat << 'MARKDOWN_EOF' > temp_content.md
           ${{ github.event.discussion.body }}
           MARKDOWN_EOF
           
+          # Sanitize HTML
           sed -i 's/<script>/\&lt;script\&gt;/g' temp_content.md
           sed -i 's/<\/script>/\&lt;\/script\&gt;/g' temp_content.md
           sed -i 's/<style>/\&lt;style\&gt;/g' temp_content.md
@@ -85,7 +67,7 @@ jobs:
           echo "content<<EOF" >> $GITHUB_OUTPUT
           echo "$html_content" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-          
+
       - name: Create or update post from template
         env:
           GIST_URL: ${{ vars.TEMPLATE_GIST_URL }}
