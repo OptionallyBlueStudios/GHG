@@ -20,170 +20,136 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-        
+
+      # ✅ New step: fetch the section name dynamically via GitHub GraphQL API
+      - name: Fetch section info via GitHub API
+        id: fetch_section
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISCUSSION_ID: ${{ github.event.discussion.node_id }}
+        run: |
+          section_name=$(gh api graphql -f query='
+            query($id:ID!){
+              node(id:$id){
+                ... on Discussion {
+                  category {
+                    section {
+                      name
+                    }
+                  }
+                }
+              }
+            }' -f id="$DISCUSSION_ID" --jq '.data.node.category.section.name // "NoSection"')
+          echo "section_name=$section_name" >> $GITHUB_OUTPUT
+
       - name: Extract Discussion Data and Convert Markdown
         id: discussion
         run: |
-          # Extract data from the webhook payload
           title=$(echo '${{ github.event.discussion.title }}' | sed 's/"/\\"/g')
           number="${{ github.event.discussion.number }}"
           category_name="${{ github.event.discussion.category.name }}"
           category_slug="${{ github.event.discussion.category.slug }}"
           
-          # Get section information if it exists
-          # GitHub API stores section in category.section property
-          section_name="${{ github.event.discussion.category.section }}"
-          
-          # If section_name is empty, use "NoSection"
+          # ✅ Get section name from the previous step
+          section_name="${{ steps.fetch_section.outputs.section_name }}"
+
           if [ -z "$section_name" ] || [ "$section_name" == "null" ]; then
             section_name="NoSection"
           fi
-          
-          # Clean section and category names for use as directory names
-          # Replace spaces with hyphens and remove special characters
+
+          # Slugify section/category
           section_slug=$(echo "$section_name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g')
-          
-          # Use the provided category slug or create one
           if [ -z "$category_slug" ] || [ "$category_slug" == "null" ]; then
             category_slug=$(echo "$category_name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g')
           fi
           
-          # Create a temporary markdown file using a here document to avoid shell interpretation
           cat << 'MARKDOWN_EOF' > temp_content.md
           ${{ github.event.discussion.body }}
           MARKDOWN_EOF
           
-          # Pre-process the markdown to escape problematic HTML tags that might break parsing
           sed -i 's/<script>/\&lt;script\&gt;/g' temp_content.md
           sed -i 's/<\/script>/\&lt;\/script\&gt;/g' temp_content.md
           sed -i 's/<style>/\&lt;style\&gt;/g' temp_content.md
           sed -i 's/<\/style>/\&lt;\/style\&gt;/g' temp_content.md
           
-          # Install marked (a popular markdown parser)
           npm install -g marked
-          
-          # Convert markdown to HTML
           html_content=$(marked --gfm --breaks temp_content.md)
-          
-          # Clean up
           rm temp_content.md
           
-          # Save outputs
           echo "title=$title" >> $GITHUB_OUTPUT
           echo "number=$number" >> $GITHUB_OUTPUT
           echo "category_name=$category_name" >> $GITHUB_OUTPUT
           echo "category_slug=$category_slug" >> $GITHUB_OUTPUT
           echo "section_name=$section_name" >> $GITHUB_OUTPUT
           echo "section_slug=$section_slug" >> $GITHUB_OUTPUT
-          
-          # For multiline content, use EOF delimiter
           echo "content<<EOF" >> $GITHUB_OUTPUT
           echo "$html_content" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-            
+          
       - name: Create or update post from template
         env:
           GIST_URL: ${{ vars.TEMPLATE_GIST_URL }}
           BLOG_NAME: ${{ vars.BLOG_NAME }}
         run: |
-          # Create directory structure: posts/section/category
           section_slug="${{ steps.discussion.outputs.section_slug }}"
           category_slug="${{ steps.discussion.outputs.category_slug }}"
           post_dir="posts/$section_slug/$category_slug"
           mkdir -p "$post_dir"
-          
           post_file="$post_dir/${{ steps.discussion.outputs.number }}.html"
           
-          # Check if this is an edit (post file already exists)
           if [ -f "$post_file" ]; then
             echo "Post exists - updating existing post"
             
-            # Get the discussion data from the previous step
-            title="${{ steps.discussion.outputs.title }}"
-            number="${{ steps.discussion.outputs.number }}"
-            
-            # Save the HTML content to a temporary file for safer handling
             cat << 'CONTENT_EOF' > temp_html_content.html
           ${{ steps.discussion.outputs.content }}
           CONTENT_EOF
             
-            # Use Python to update specific elements in the existing HTML file
             python3 << 'PYTHON_EOF'
           import re
-          
           def replace_element_content(html, element_id, new_content):
-              """Replace content inside an element with specific id"""
               opening_pattern = r'<(\w+)([^>]*id=["\']' + re.escape(element_id) + r'["\'][^>]*)>'
               opening_match = re.search(opening_pattern, html)
-              
               if not opening_match:
                   print(f"Warning: Element with id '{element_id}' not found")
                   return html
-              
               element_type = opening_match.group(1)
-              
               pattern = r'(<' + element_type + r'[^>]*id=["\']' + re.escape(element_id) + r'["\'][^>]*>)(.*?)(<\/' + element_type + r'>)'
-              
               def replacer(match):
-                  opening_tag = match.group(1)
-                  closing_tag = match.group(3)
-                  return opening_tag + new_content + closing_tag
-              
-              result = re.sub(pattern, replacer, html, flags=re.DOTALL)
-              return result
-          
+                  return match.group(1) + new_content + match.group(3)
+              return re.sub(pattern, replacer, html, flags=re.DOTALL)
+
           post_file = "posts/${{ steps.discussion.outputs.section_slug }}/${{ steps.discussion.outputs.category_slug }}/${{ steps.discussion.outputs.number }}.html"
-          
-          # Read the existing HTML file
           with open(post_file, 'r') as f:
               existing_html = f.read()
-          
-          # Read the new content
           with open('temp_html_content.html', 'r') as f:
               new_content = f.read().strip()
-          
-          # Update the title element with id="title-forpost"
           new_title = '''${{ steps.discussion.outputs.title }}'''
           existing_html = replace_element_content(existing_html, 'title-forpost', new_title)
-          
-          # Update the content element with id="maincontent-forpost"
           existing_html = replace_element_content(existing_html, 'maincontent-forpost', new_content)
-          
-          # Write the updated file back
           with open(post_file, 'w') as f:
               f.write(existing_html)
           PYTHON_EOF
             
-            # Clean up temporary files
             rm temp_html_content.html
             
           else
             echo "New post - creating from template"
-            
-            # Download the template from the gist
             curl -s "$GIST_URL" -o template.html
             
-            # Read the template file
             template_content=$(cat template.html)
-            
-            # Get the discussion data from the previous step
             title="${{ steps.discussion.outputs.title }}"
             number="${{ steps.discussion.outputs.number }}"
             category_name="${{ steps.discussion.outputs.category_name }}"
             section_name="${{ steps.discussion.outputs.section_name }}"
-            
-            # Get repository info
             repo_path="${{ github.repository }}"
             blog_name="$BLOG_NAME"
             
-            # Escape special characters for sed
             escaped_title=$(printf '%s\n' "$title" | sed 's/[/]/\\&/g' | sed 's/&/\\&/g')
             escaped_blog_name=$(printf '%s\n' "$blog_name" | sed 's/[/]/\\&/g' | sed 's/&/\\&/g')
             escaped_repo_path=$(printf '%s\n' "$repo_path" | sed 's/[/]/\\&/g' | sed 's/&/\\&/g')
             escaped_category=$(printf '%s\n' "$category_name" | sed 's/[/]/\\&/g' | sed 's/&/\\&/g')
             escaped_section=$(printf '%s\n' "$section_name" | sed 's/[/]/\\&/g' | sed 's/&/\\&/g')
             
-            # Replace placeholders in the template step by step
             echo "$template_content" | sed "s|{{ discussion\.title }}|$escaped_title|g" > temp_template.html
             sed "s|{{ discussion\.id }}|$number|g" temp_template.html > temp_template2.html
             sed "s|{{ blog\.name }}|$escaped_blog_name|g" temp_template2.html > temp_template3.html
@@ -191,33 +157,22 @@ jobs:
             sed "s|{{ discussion\.category }}|$escaped_category|g" temp_template4.html > temp_template5.html
             sed "s|{{ discussion\.section }}|$escaped_section|g" temp_template5.html > temp_template6.html
             
-            # Save the HTML content to a temporary file
             cat << 'CONTENT_EOF' > temp_html_content.html
           ${{ steps.discussion.outputs.content }}
           CONTENT_EOF
             
-            # Use Python to replace the content placeholder
             python3 << 'PYTHON_EOF'
           import re
-          
-          # Read the template
           with open('temp_template6.html', 'r') as f:
               template = f.read()
-          
-          # Read the HTML content
           with open('temp_html_content.html', 'r') as f:
               content = f.read()
-          
-          # Replace the content placeholder
           final_html = re.sub(r'\{\{\s*discussion\.content\s*\}\}', content, template)
-          
-          # Write the final file
           post_file = "posts/${{ steps.discussion.outputs.section_slug }}/${{ steps.discussion.outputs.category_slug }}/${{ steps.discussion.outputs.number }}.html"
           with open(post_file, 'w') as f:
               f.write(final_html)
           PYTHON_EOF
             
-            # Clean up temporary files
             rm template.html temp_template*.html temp_html_content.html
           fi
           
@@ -230,7 +185,6 @@ jobs:
           category_slug="${{ steps.discussion.outputs.category_slug }}"
           post_file="posts/$section_slug/$category_slug/${{ steps.discussion.outputs.number }}.html"
           
-          # Check if this was an edit or new post
           if git diff --quiet; then
             echo "No changes to commit"
             exit 0
@@ -238,15 +192,10 @@ jobs:
           
           git add "$post_file"
           
-          # Determine if this is a new post or update based on git status
-          if git diff --cached --name-only | grep -q "$post_file"; then
-            if git ls-files --error-unmatch "$post_file" 2>/dev/null; then
-              # File exists in git, this is an update
-              git commit -m "[DISBLOG] ✏️ Update blog post from discussion #${{ steps.discussion.outputs.number }} in $section_slug/$category_slug: ${{ steps.discussion.outputs.title }}"
-            else
-              # File doesn't exist in git, this is new
-              git commit -m "[DISBLOG] 📝 Add blog post from discussion #${{ steps.discussion.outputs.number }} in $section_slug/$category_slug: ${{ steps.discussion.outputs.title }}"
-            fi
+          if git ls-files --error-unmatch "$post_file" 2>/dev/null; then
+            git commit -m "[DISBLOG] ✏️ Update blog post from discussion #${{ steps.discussion.outputs.number }} in $section_slug/$category_slug: ${{ steps.discussion.outputs.title }}"
+          else
+            git commit -m "[DISBLOG] 📝 Add blog post from discussion #${{ steps.discussion.outputs.number }} in $section_slug/$category_slug: ${{ steps.discussion.outputs.title }}"
           fi
           
           git push
