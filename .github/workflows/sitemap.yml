@@ -23,7 +23,7 @@ jobs:
       id: sitemap
       uses: cicirello/generate-sitemap@v1
       with:
-        base-url-path: https://optionallybluesutdios.github.io/GHG/
+        base-url-path: https://optionallybluestudios.github.io/GHG/
         path-to-root: .
         include-pdf: false
         include-html: true

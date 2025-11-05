@@ -126,24 +126,24 @@
         </div>
 
         <div class="categories-grid">
-            <div class="category-card" onclick="window.location.href='/category/memory-hacking'">
+            <div class="category-card" data-slug="memory-hacking" onclick="window.location.href='/category/memory-hacking'">
                 <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 16 16"><path d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14a2.5 2.5 0 0 1-2.5 2.5v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0m-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5zM6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5z"/></svg></div>
                 <h3>Memory Hacking</h3>
                 <p class="count">0 posts</p>
             </div>
-            <div class="category-card" onclick="window.location.href='/category/code-injection'">
-                <div class="icon">💉</div><h3>Code Injection</h3><p class="count">0 posts</p>
+            <div class="category-card" data-slug="code-injection" onclick="window.location.href='/category/code-injection'">
+                <div class="icon">💉</div><h3>Game CLI</h3><p class="count">0 posts</p>
             </div>
-            <div class="category-card" onclick="window.location.href='/category/reverse-engineering'">
+            <div class="category-card" data-slug="save-editing" onclick="window.location.href='/category/save-editing'">
                 <div class="icon">🔍</div><h3>Save Editing</h3><p class="count">0 posts</p>
             </div>
-            <div class="category-card" onclick="window.location.href='/category/game-engines'">
+            <div class="category-card" data-slug="game-engines" onclick="window.location.href='/category/game-engines'">
                 <div class="icon">🎮</div><h3>Game Engines</h3><p class="count">0 posts</p>
             </div>
-            <div class="category-card" onclick="window.location.href='/category/tools'">
+            <div class="category-card" data-slug="tools" onclick="window.location.href='/category/tools'">
                 <div class="icon">🛠️</div><h3>Tools & Resources</h3><p class="count">0 posts</p>
             </div>
-            <div class="category-card" onclick="window.location.href='/category/anti-cheat'">
+            <div class="category-card" data-slug="bypass-anti-cheat" onclick="window.location.href='/category/bypass-anti-cheat'">
                 <div class="icon">🛡️</div><h3>Bypassing The Anti-Cheat</h3><p class="count">0 posts</p>
             </div>
         </div>
@@ -170,81 +170,10 @@
         const POSTS_CONTAINER = document.getElementById('latest-posts');
         const LOADER = document.getElementById('posts-loading');
         const MAX_DISPLAY = 6; // how many latest posts to show
+        const CATEGORY_SLUGS = ['memory-hacking','code-injection','save-editing','game-engines','tools','bypass-anti-cheat'];
 
-        // prettify slug: "memory-scanning-basics" -> "Memory Scanning Basics"
-        function prettifySlug(slug){
-            return slug
-                .replace(/\.[^/.]+$/, "") // remove extension
-                .replace(/[-_]+/g, ' ')
-                .split(' ')
-                .map(s => s.length ? s[0].toUpperCase() + s.slice(1) : '')
-                .join(' ');
-        }
+        // ...existing code...
 
-        // attempt to extract numeric id from filename: "post-123.html" -> 123
-        function numericFromFilename(filename){
-            const m = filename.match(/(\d{3,}| \d{2,}|\d+)/g);
-            if(!m) return null;
-            // return highest numeric token
-            return Math.max(...m.map(Number));
-        }
-
-        // estimate read time from text (words / 200)
-        function estimateReadTime(text){
-            const words = (text || '').trim().split(/\s+/).filter(Boolean).length;
-            return Math.max(1, Math.round(words / 200));
-        }
-
-        // build a card DOM node
-        function buildCard({href, category, title, excerpt, readTime}) {
-            const card = document.createElement('div');
-            card.className = 'post-card';
-            card.onclick = () => { window.location.href = href; };
-            const cat = document.createElement('span');
-            cat.className = 'category';
-            cat.textContent = category || 'General';
-            const h3 = document.createElement('h3');
-            h3.textContent = title || prettifySlug(href.split('/').pop());
-            const ex = document.createElement('p');
-            ex.className = 'excerpt';
-            ex.textContent = excerpt || '';
-            const meta = document.createElement('div');
-            meta.className = 'meta';
-            const spanLeft = document.createElement('span');
-            spanLeft.textContent = category || '';
-            const spanRight = document.createElement('span');
-            spanRight.textContent = (readTime ? readTime + ' min read' : '');
-            meta.appendChild(spanLeft);
-            meta.appendChild(spanRight);
-            card.appendChild(cat);
-            card.appendChild(h3);
-            card.appendChild(ex);
-            card.appendChild(meta);
-            return card;
-        }
-
-        // parse sitemap XML and return array of {loc, lastmod}
-        function parseSitemap(xmlText){
-            try {
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(xmlText, "application/xml");
-                const urls = Array.from(xml.getElementsByTagName('url'));
-                const entries = urls.map(u => {
-                    const locEl = u.getElementsByTagName('loc')[0];
-                    const lastmodEl = u.getElementsByTagName('lastmod')[0];
-                    return {
-                        loc: locEl ? locEl.textContent.trim() : null,
-                        lastmod: lastmodEl ? lastmodEl.textContent.trim() : null
-                    };
-                }).filter(e => e.loc && e.loc.includes('/posts/'));
-                return entries;
-            } catch (e) {
-                console.warn('Failed to parse sitemap.xml', e);
-                return [];
-            }
-        }
-
-        // fetch a post page and extract title, description or first paragraph
         async function fetchPostMeta(url){
             try {
                 const res = await fetch(url, { credentials: 'same-origin' });
@@ -252,22 +181,23 @@
                 const text = await res.text();
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
-                const metaTitle = doc.querySelector('meta[property="og:title"]')?.getAttribute('content')
+                // prefer explicit post title in the post HTML (id="title-forpost" or .post-meta h1)
+                const pageTitle = doc.querySelector('#title-forpost')?.textContent?.trim()
+                    || doc.querySelector('.post-meta h1')?.textContent?.trim()
+                    || doc.querySelector('meta[property="og:title"]')?.getAttribute('content')
                     || doc.querySelector('meta[name="title"]')?.getAttribute('content')
                     || doc.querySelector('title')?.textContent || null;
                 const metaDesc = doc.querySelector('meta[property="og:description"]')?.getAttribute('content')
                     || doc.querySelector('meta[name="description"]')?.getAttribute('content') || null;
                 let excerpt = metaDesc;
                 if(!excerpt){
-                    // try first <article> or first <p>
                     excerpt = doc.querySelector('article p')?.textContent?.trim()
                         || doc.querySelector('p')?.textContent?.trim() || '';
                 }
                 const bodyText = doc.body ? doc.body.textContent || '' : '';
                 const readTime = estimateReadTime(bodyText);
-                return { title: metaTitle, excerpt: excerpt, readTime };
+                return { title: pageTitle, excerpt: excerpt, readTime };
             } catch (e) {
-                // fetch blocked (CORS) or network error; fall back
                 return null;
             }
         }
@@ -279,34 +209,33 @@
                 if(!res.ok) throw new Error('sitemap fetch failed: ' + res.status);
                 const xmlText = await res.text();
                 const entries = parseSitemap(xmlText);
+                // update category counts based on known folder slugs
+                (function updateCategoryCounts(){
+                    const counts = Object.fromEntries(CATEGORY_SLUGS.map(s => [s, 0]));
+                    entries.forEach(e => {
+                        try {
+                            const urlObj = new URL(e.loc, window.location.origin);
+                            const postsPart = urlObj.pathname.split('/posts/')[1] || '';
+                            const segments = postsPart.split('/').filter(Boolean);
+                            for (const slug of CATEGORY_SLUGS) {
+                                if (segments.includes(slug)) { counts[slug]++; break; }
+                            }
+                        } catch (_) {}
+                    });
+                    CATEGORY_SLUGS.forEach(slug => {
+                        const el = document.querySelector('.category-card[data-slug="'+slug+'"]');
+                        if (el) {
+                            const countEl = el.querySelector('.count');
+                            const n = counts[slug] || 0;
+                            countEl.textContent = n + ' post' + (n === 1 ? '' : 's');
+                        }
+                    });
+                })();
+
                 if(entries.length === 0) {
                     LOADER.textContent = 'No posts found in sitemap.xml under /posts/.';
                     return;
                 }
-
-                // convert to enriched list with sortable date/num
-                const enriched = entries.map(e => {
-                    const urlObj = new URL(e.loc, window.location.origin);
-                    // get everything after /posts/
-                    const postsPart = urlObj.pathname.split('/posts/')[1] || '';
-                    const segments = postsPart.split('/').filter(Boolean);
-                    const filename = segments[segments.length - 1] || '';
-                    const category = segments.length >= 2 ? prettifySlug(segments[segments.length - 2]) : (segments[0] ? prettifySlug(segments[0]) : 'General');
-                    // prefer lastmod if present
-                    let sortKey = null;
-                    if(e.lastmod) {
-                        const t = Date.parse(e.lastmod);
-                        if(!isNaN(t)) sortKey = t;
-                    }
-                    // otherwise try numeric id from filename
-                    if(!sortKey) {
-                        const n = numericFromFilename(filename);
-                        if(n) sortKey = n;
-                    }
-                    // fallback to zero
-                    if(!sortKey) sortKey = 0;
-                    return { loc: e.loc, filename, category, sortKey };
-                });
 
                 // sort descending (latest first)
                 enriched.sort((a,b) => b.sortKey - a.sortKey);
