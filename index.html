@@ -172,7 +172,81 @@
         const MAX_DISPLAY = 6; // how many latest posts to show
         const CATEGORY_SLUGS = ['memory-hacking','code-injection','save-editing','game-engines','tools','bypass-anti-cheat'];
 
-        // ...existing code...
+        // parse sitemap XML and return entries for /posts/
+        function parseSitemap(xmlText){
+            try {
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(xmlText, "application/xml");
+                const urls = Array.from(xml.getElementsByTagName('url'));
+                return urls.map(u => {
+                    const locEl = u.getElementsByTagName('loc')[0];
+                    const lastmodEl = u.getElementsByTagName('lastmod')[0];
+                    return {
+                        loc: locEl ? locEl.textContent.trim() : null,
+                        lastmod: lastmodEl ? lastmodEl.textContent.trim() : null
+                    };
+                }).filter(e => e.loc && e.loc.includes('/posts/'));
+            } catch (e) {
+                console.warn('parseSitemap error', e);
+                return [];
+            }
+        }
+
+        // small prettifier for filename slugs -> readable title
+        function prettifySlug(slug){
+            if(!slug) return '';
+            // strip extension, numbers-only filename etc.
+            slug = slug.replace(/\.[a-z0-9]+$/i, '');
+            const parts = slug.split('/').filter(Boolean);
+            const last = parts[parts.length-1] || slug;
+            return last.replace(/[-_]/g,' ').replace(/\b\w/g, s => s.toUpperCase());
+        }
+
+        // estimate read time from body text
+        function estimateReadTime(text){
+            if(!text) return '1 min read';
+            const words = (text || '').trim().split(/\s+/).filter(Boolean).length;
+            const mins = Math.max(1, Math.round(words / 200));
+            return mins + ' min read';
+        }
+
+        // build a simple post card element
+        function buildCard({ href, category, title, excerpt, readTime }){
+            const el = document.createElement('div');
+            el.className = 'post-card';
+            el.addEventListener('click', () => { window.location.href = href; });
+
+            if(category){
+                const c = document.createElement('div');
+                c.className = 'category';
+                c.textContent = category;
+                el.appendChild(c);
+            }
+
+            const h = document.createElement('h3');
+            h.textContent = title || '';
+            el.appendChild(h);
+
+            const ex = document.createElement('div');
+            ex.className = 'excerpt';
+            ex.textContent = excerpt || '';
+            el.appendChild(ex);
+
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+
+            const left = document.createElement('div');
+            left.textContent = readTime || '';
+            meta.appendChild(left);
+
+            const right = document.createElement('div');
+            right.className = 'muted';
+            right.textContent = href ? new URL(href, window.location.origin).pathname.split('/').pop() : '';
+            meta.appendChild(right);
+
+            el.appendChild(meta);
+            return el;
+        }
 
         async function fetchPostMeta(url){
             try {
@@ -209,14 +283,28 @@
                 if(!res.ok) throw new Error('sitemap fetch failed: ' + res.status);
                 const xmlText = await res.text();
                 const entries = parseSitemap(xmlText);
+
+                // create enriched array with category/filename/sortKey used later
+                const enriched = entries.map(e => {
+                    try {
+                        const urlObj = new URL(e.loc, window.location.origin);
+                        const postsPart = (urlObj.pathname.split('/posts/')[1] || '').replace(/^\/|\/$/g,'');
+                        const segments = postsPart.split('/').filter(Boolean);
+                        const filename = segments[segments.length - 1] || '';
+                        const category = segments[0] || '';
+                        const sortKey = e.lastmod ? Date.parse(e.lastmod) : Date.now();
+                        return { loc: e.loc, lastmod: e.lastmod, filename, category, sortKey };
+                    } catch (err) {
+                        return { loc: e.loc, lastmod: e.lastmod, filename: '', category: '', sortKey: Date.now() };
+                    }
+                });
+
                 // update category counts based on known folder slugs
                 (function updateCategoryCounts(){
                     const counts = Object.fromEntries(CATEGORY_SLUGS.map(s => [s, 0]));
-                    entries.forEach(e => {
+                    enriched.forEach(item => {
                         try {
-                            const urlObj = new URL(e.loc, window.location.origin);
-                            const postsPart = urlObj.pathname.split('/posts/')[1] || '';
-                            const segments = postsPart.split('/').filter(Boolean);
+                            const segments = (item.loc.split('/posts/')[1] || '').split('/').filter(Boolean);
                             for (const slug of CATEGORY_SLUGS) {
                                 if (segments.includes(slug)) { counts[slug]++; break; }
                             }
@@ -232,7 +320,7 @@
                     });
                 })();
 
-                if(entries.length === 0) {
+                if(enriched.length === 0) {
                     LOADER.textContent = 'No posts found in sitemap.xml under /posts/.';
                     return;
                 }
