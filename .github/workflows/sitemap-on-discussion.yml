@@ -1,0 +1,40 @@
+name: Generate Sitemap After Discussion Dispatch
+
+on:
+  repository_dispatch:
+    types: [generate_sitemap_after_discussion]
+
+jobs:
+  sitemap_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate the sitemap
+        id: sitemap
+        uses: cicirello/generate-sitemap@v1
+        with:
+          base-url-path: https://optionallybluestudios.github.io/GHG/
+          path-to-root: .
+          include-pdf: false
+          include-html: true
+          sitemap-format: xml
+          drop-html-extension: true
+          exclude-paths: |
+            template.html
+            posts/assets/*
+
+      - name: Commit sitemap changes
+        run: |
+          git config --local user.email "sitemap-on-discussion@github.com"
+          git config --local user.name "SITEMAP OD"
+          git add sitemap.xml
+          if git diff --cached --quiet; then
+            echo "No staged changes to commit"
+          else
+            git commit -m "[SITEMAP OD] 🔗 ${{ steps.sitemap.outputs.url-count }} URLs found. Updated sitemap.xml in root directory."
+            git push
