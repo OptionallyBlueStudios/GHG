@@ -41,8 +41,7 @@ jobs:
           section_slug=$(echo "$section_name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g')
           category_slug=$(echo "$category_name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g')
 
-          # Create slugs
-          section_slug=$(echo "$section_name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g')
+          # Override category_slug if empty or null
           if [ -z "$category_slug" ] || [ "$category_slug" == "null" ]; then
             category_slug=$(echo "$category_name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g')
           fi
@@ -148,12 +147,12 @@ jobs:
           CONTENT_EOF
             
             python3 << 'PYTHON_EOF'
-          import re
           with open('temp_template6.html', 'r') as f:
               template = f.read()
           with open('temp_html_content.html', 'r') as f:
               content = f.read()
-          final_html = re.sub(r'\{\{\s*discussion\.content\s*\}\}', content, template)
+          # Use simple string replacement to avoid regex escape issues
+          final_html = template.replace('{{ discussion.content }}', content)
           post_file = "posts/${{ steps.discussion.outputs.section_slug }}/${{ steps.discussion.outputs.category_slug }}/${{ steps.discussion.outputs.number }}.html"
           with open(post_file, 'w') as f:
               f.write(final_html)
@@ -185,6 +184,7 @@ jobs:
           fi
           
           git push
+          
       - name: Trigger sitemap workflow 1 minute later
         run: |
           curl -X POST \
