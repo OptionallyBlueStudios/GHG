@@ -41,7 +41,7 @@ jobs:
 
           const token = process.env.GITHUB_TOKEN;
           const repoFull = process.env.GITHUB_REPOSITORY;
-          const outputDir = process.env.OUTPUT_DIR || "feeds";
+          const outputDir = process.env.OUTPUT_DIR || "rss";
 
           if (!token || !repoFull) {
             console.error("Missing GITHUB_TOKEN or GITHUB_REPOSITORY");
