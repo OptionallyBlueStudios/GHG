@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title><![CDATA[Tools/Save Editors Discussions]]></title>
+        <description><![CDATA[RSS feed for Tools/Save Editors discussions]]></description>
+        <link>https://github.com/OptionallyBlueStudios/GHG/discussions</link>
+        <generator>RSS for Node</generator>
+        <lastBuildDate>Thu, 06 Nov 2025 20:01:31 GMT</lastBuildDate>
+        <atom:link href="https://optionallybluestudios.github.io/GHG/feeds/tools/save-editors.xml" rel="self" type="application/rss+xml"/>
+        <pubDate>Thu, 06 Nov 2025 20:01:31 GMT</pubDate>
+        <item>
+            <title><![CDATA[GHG Edit- A new save editor]]></title>
+            <description><![CDATA[<p dir="auto">Introducing GHG Edit- our new save editor. You can access it at <a href="https://optionallybluestudios.github.io/GHG/tools/saveedit" rel="nofollow">https://optionallybluestudios.github.io/GHG/tools/saveedit</a></p>
+<p dir="auto">It supports all save types (except obscure ones and direct ES3S)</p>]]></description>
+            <link>https://optionallybluestudios.github.io/GHG/posts/tools/save-editors/2.html</link>
+            <guid isPermaLink="false">D_kwDOQPQH184AivLG</guid>
+            <pubDate>Tue, 04 Nov 2025 20:44:23 GMT</pubDate>
+        </item>
+    </channel>
+</rss>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title><![CDATA[Test Posts/Category1 Discussions]]></title>
+        <description><![CDATA[RSS feed for Test Posts/Category1 discussions]]></description>
+        <link>https://github.com/OptionallyBlueStudios/GHG/discussions</link>
+        <generator>RSS for Node</generator>
+        <lastBuildDate>Thu, 06 Nov 2025 20:01:31 GMT</lastBuildDate>
+        <atom:link href="https://optionallybluestudios.github.io/GHG/feeds/test-posts/category1.xml" rel="self" type="application/rss+xml"/>
+        <pubDate>Thu, 06 Nov 2025 20:01:31 GMT</pubDate>
+        <item>
+            <title><![CDATA[Test sections and sitemap work]]></title>
+            <description><![CDATA[<p dir="auto">hi</p>
+<h2 dir="auto">my name is</h2>
+<p dir="auto">what</p>
+<h3 dir="auto">my name is</h3>
+<p dir="auto">why</p>
+<h1 dir="auto">thats not ur line</h1>]]></description>
+            <link>https://optionallybluestudios.github.io/GHG/posts/test-posts/category1/6.html</link>
+            <guid isPermaLink="false">D_kwDOQPQH184AiwMW</guid>
+            <pubDate>Wed, 05 Nov 2025 20:06:55 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Test all markdown features]]></title>
+            <description><![CDATA[<h1 dir="auto">🧪 Markdown Test Block</h1>
+<p dir="auto">This file is for <strong>testing Markdown rendering</strong> across interpreters (e.g., GitHub, Discord, custom parsers, etc).</p>
+<hr>
+<h2 dir="auto"><g-emoji class="g-emoji" alias="warning">⚠️</g-emoji> Callout Examples</h2>
+<p dir="auto">![INFO] This is an informational message.<br>
+![TIP] You can use <strong>bold</strong> and <em>italic</em> text here!<br>
+![WARNING] This is a warning message — pay attention.<br>
+![ERROR] Something went wrong!<br>
+![SUCCESS] Operation completed successfully.</p>
+<blockquote>
+<p dir="auto">💡 <strong>Note:</strong> Some interpreters don’t support <code class="notranslate">![WARNING]</code> syntax.<br>
+Use emoji or blockquotes for fallback instead.</p>
+</blockquote>
+<hr>
+<h2 dir="auto">📋 Lists</h2>
+<h3 dir="auto">Unordered</h3>
+<ul dir="auto">
+<li>Item 1
+<ul dir="auto">
+<li>Sub-item A</li>
+<li>Sub-item B</li>
+</ul>
+</li>
+<li>Item 2</li>
+<li>Item 3</li>
+</ul>
+<h3 dir="auto">Ordered</h3>
+<ol dir="auto">
+<li>First</li>
+<li>Second
+<ol dir="auto">
+<li>Nested</li>
+<li>Nested</li>
+</ol>
+</li>
+<li>Third</li>
+</ol>
+<hr>
+<h2 dir="auto">🧱 Code Blocks</h2>
+<h3 dir="auto">Inline</h3>
+<p dir="auto">Use <code class="notranslate">inline code</code> for short snippets.</p>
+<h3 dir="auto">Multiline (example)</h3>
+<div class="snippet-clipboard-content notranslate position-relative overflow-auto" data-snippet-clipboard-copy-content="def greet(name):
+    print(f&quot;Hello, {name}!&quot;)"><pre class="notranslate"><code class="notranslate">def greet(name):
+    print(f"Hello, {name}!")
+</code></pre></div>
+<p dir="auto">JSON Example:<br>
+{<br>
+"status": "ok",<br>
+"message": "Markdown test successful"<br>
+}</p>
+<hr>
+<h2 dir="auto">📊 Table Test</h2>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Alpha</td>
+<td>String</td>
+<td>✅ Active</td>
+</tr>
+<tr>
+<td>Beta</td>
+<td>Integer</td>
+<td><g-emoji class="g-emoji" alias="warning">⚠️</g-emoji> Pending</td>
+</tr>
+<tr>
+<td>Gamma</td>
+<td>Boolean</td>
+<td>❌ Error</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<hr>
+<h2 dir="auto">🖼️ Image Test</h2>
+<p dir="auto"><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/998fa66ff03cd03b885ed190c9f43310648eaa9b341d2ba4f66fe41b532074ed/68747470733a2f2f6769746875622e6769746875626173736574732e636f6d2f696d616765732f6d6f64756c65732f6c6f676f735f706167652f4769744875622d4d61726b2e706e67"><img src="https://camo.githubusercontent.com/998fa66ff03cd03b885ed190c9f43310648eaa9b341d2ba4f66fe41b532074ed/68747470733a2f2f6769746875622e6769746875626173736574732e636f6d2f696d616765732f6d6f64756c65732f6c6f676f735f706167652f4769744875622d4d61726b2e706e67" alt="GitHub Logo" data-canonical-src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" style="max-width: 100%;"></a></p>
+<hr>
+<h2 dir="auto">📎 Links and Text</h2>
+<ul dir="auto">
+<li><a href="https://github.com">GitHub Homepage</a></li>
+<li><strong>Bold</strong>, <em>italic</em>, <del>strikethrough</del>, and <code class="notranslate">monospace</code>.</li>
+</ul>
+<hr>
+<h2 dir="auto">🧩 Nested Elements</h2>
+<blockquote>
+<h3 dir="auto">⚡ Nested Block</h3>
+<ul dir="auto">
+<li>Inside quote list item</li>
+<li><strong>Bold text inside quote</strong></li>
+<li>Inline <code class="notranslate">code</code> here too</li>
+</ul>
+</blockquote>
+<hr>
+<h2 dir="auto">🧭 Horizontal Rule Test</h2>
+<h2 dir="auto">Above line ⬆️</h2>
+<p dir="auto">Below line ⬇️</p>
+<hr>
+<p dir="auto">✅ <em>End of Markdown Test Block.</em></p>
+<div class="snippet-clipboard-content notranslate position-relative overflow-auto" data-snippet-clipboard-copy-content="well most of them at least"><pre class="notranslate"><code class="notranslate">well most of them at least
+</code></pre></div>
+<p dir="auto"><code class="notranslate">he</code> <code class="notranslate">he</code></p>]]></description>
+            <link>https://optionallybluestudios.github.io/GHG/posts/test-posts/category1/5.html</link>
+            <guid isPermaLink="false">D_kwDOQPQH184AiwL2</guid>
+            <pubDate>Wed, 05 Nov 2025 19:52:42 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Test Post 1]]></title>
+            <description><![CDATA[<p dir="auto">Now... Hello</p>
+<h1 dir="auto">Title</h1>
+<h2 dir="auto">Title 2</h2>
+<h3 dir="auto">Title 3</h3>
+<p dir="auto">TEXT</p>
+<div class="snippet-clipboard-content notranslate position-relative overflow-auto" data-snippet-clipboard-copy-content="big boi"><pre class="notranslate"><code class="notranslate">big boi
+</code></pre></div>
+<p dir="auto">uwaaaaaaaaaaaaaaaaaaaaaaa<br>
+<strong>BOLD BOI</strong><br>
+<em>uwu</em><br>
+<del>uwauw</del></p>
+<h1 dir="auto">REGEN TIME BABYYYYYY  (again again again again again again)</h1>]]></description>
+            <link>https://optionallybluestudios.github.io/GHG/posts/test-posts/category1/1.html</link>
+            <guid isPermaLink="false">D_kwDOQPQH184AivE7</guid>
+            <pubDate>Tue, 04 Nov 2025 20:08:03 GMT</pubDate>
+        </item>
+    </channel>
+</rss>
