@@ -1,0 +1,167 @@
+name: Generate Category RSS Feeds
+
+on:
+  discussion:
+    types: [created, edited, answered, unpinned, pinned]
+  workflow_dispatch: {} # manual trigger
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      discussions: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install @octokit/graphql rss slugify
+
+      - name: Generate category RSS feeds
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          OUTPUT_DIR: docs/feeds
+        run: |
+          node - <<'EOF'
+          const fs = require("fs");
+          const path = require("path");
+          const { graphql } = require("@octokit/graphql");
+          const RSS = require("rss");
+          const slugify = require("slugify");
+
+          const token = process.env.GITHUB_TOKEN;
+          const repoFull = process.env.GITHUB_REPOSITORY;
+          const outputDir = process.env.OUTPUT_DIR || "docs/feeds";
+
+          if (!token || !repoFull) {
+            console.error("Missing GITHUB_TOKEN or GITHUB_REPOSITORY");
+            process.exit(1);
+          }
+
+          const [owner, repo] = repoFull.split("/");
+
+          const client = graphql.defaults({
+            headers: { authorization: `bearer ${token}` },
+          });
+
+          async function fetchAllDiscussions() {
+            const query = `
+              query($owner: String!, $repo: String!, $after: String) {
+                repository(owner: $owner, name: $repo) {
+                  discussions(first: 100, after: $after, orderBy: { field: UPDATED_AT, direction: DESC }) {
+                    nodes {
+                      id
+                      number
+                      title
+                      bodyHTML
+                      bodyText
+                      createdAt
+                      updatedAt
+                      category { name }
+                    }
+                    pageInfo {
+                      hasNextPage
+                      endCursor
+                    }
+                  }
+                }
+              }
+            `;
+            let all = [];
+            let cursor = null;
+            do {
+              const res = await client(query, { owner, repo, after: cursor });
+              const d = res.repository.discussions;
+              all.push(...d.nodes);
+              cursor = d.pageInfo.hasNextPage ? d.pageInfo.endCursor : null;
+            } while (cursor);
+            return all;
+          }
+
+          function toSlugPath(categoryName) {
+            return categoryName
+              .split("/")
+              .map(p => slugify(p, { lower: true, strict: true }))
+              .join("/");
+          }
+
+          function buildPostURL(category, number) {
+            const catPath = toSlugPath(category);
+            return `https://optionallybluestudios.github.io/GHG/posts/${catPath}/${number}.html`;
+          }
+
+          function groupByCategory(discussions) {
+            const map = {};
+            for (const d of discussions) {
+              const category = d.category?.name || "Uncategorized";
+              if (!map[category]) map[category] = [];
+              map[category].push(d);
+            }
+            return map;
+          }
+
+          function generateFeed(category, discussions) {
+            const feed = new RSS({
+              title: `${category} Discussions`,
+              description: `RSS feed for ${category} discussions`,
+              feed_url: `https://optionallybluestudios.github.io/GHG/feeds/${toSlugPath(category)}.xml`,
+              site_url: `https://github.com/${owner}/${repo}/discussions`,
+              pubDate: new Date(),
+            });
+
+            discussions.forEach(d => {
+              feed.item({
+                title: d.title,
+                description: d.bodyHTML || d.bodyText?.slice(0, 500),
+                url: buildPostURL(d.category?.name || "Uncategorized", d.number),
+                guid: d.id,
+                date: d.updatedAt,
+              });
+            });
+
+            return feed.xml({ indent: true });
+          }
+
+          (async () => {
+            try {
+              console.log("Fetching discussions...");
+              const discussions = await fetchAllDiscussions();
+              const byCat = groupByCategory(discussions);
+
+              fs.mkdirSync(outputDir, { recursive: true });
+
+              for (const [category, items] of Object.entries(byCat)) {
+                const xml = generateFeed(category, items);
+                const filePath = path.join(outputDir, `${toSlugPath(category)}.xml`);
+                fs.mkdirSync(path.dirname(filePath), { recursive: true });
+                fs.writeFileSync(filePath, xml, "utf8");
+                console.log(`Generated ${filePath} (${items.length} items)`);
+              }
+            } catch (err) {
+              console.error("Error:", err);
+              process.exit(1);
+            }
+          })();
+          EOF
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/feeds || true
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update category RSS feeds"
+            git push
+          else
+            echo "No changes to commit."
+          fi
