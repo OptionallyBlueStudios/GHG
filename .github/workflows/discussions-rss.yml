@@ -33,11 +33,15 @@ jobs:
           OUTPUT_DIR: docs/feeds
         run: |
           node - <<'EOF'
-          const fs = require("fs");
-          const path = require("path");
-          const { graphql } = require("@octokit/graphql");
-          const RSS = require("rss");
-          const slugify = require("slugify");
+          import fs from "fs";
+          import path from "path";
+          import { fileURLToPath } from "url";
+          import { createRequire } from "module";
+          import RSS from "rss";
+          import slugify from "slugify";
+          import { graphql } from "@octokit/graphql";
+
+          const require = createRequire(import.meta.url);
 
           const token = process.env.GITHUB_TOKEN;
           const repoFull = process.env.GITHUB_REPOSITORY;
