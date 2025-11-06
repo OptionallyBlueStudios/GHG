@@ -30,7 +30,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          OUTPUT_DIR: docs/feeds
+          OUTPUT_DIR: rss
         run: |
           node --input-type=module - <<'EOF'
           import fs from "fs";
