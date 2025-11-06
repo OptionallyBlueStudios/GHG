@@ -192,3 +192,75 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/${{ github.repository }}/dispatches \
             -d '{"event_type":"generate_sitemap_after_discussion"}'
+  sitemap_job:
+    runs-on: ubuntu-latest
+    name: Generate a sitemap
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Generate the sitemap
+      id: sitemap
+      uses: cicirello/generate-sitemap@v1
+      with:
+        base-url-path: https://optionallybluestudios.github.io/GHG/
+        path-to-root: .
+        include-pdf: false
+        include-html: true
+        sitemap-format: xml
+        drop-html-extension: true
+        exclude-paths: |
+          template.html
+          posts/assets/*
+    - name: Output stats
+      run: |
+        echo "sitemap-path = ${{ steps.sitemap.outputs.sitemap-path }}"
+        echo "url-count = ${{ steps.sitemap.outputs.url-count }}"
+        echo "excluded-count = ${{ steps.sitemap.outputs.excluded-count }}"
+    
+    - name: Check for sitemap changes
+      id: verify-changed-files
+      run: |
+        echo "Checking if sitemap.xml exists and has changes..."
+        ls -la sitemap.xml || echo "sitemap.xml not found"
+        
+        echo "Git status before check:"
+        git status --porcelain
+        
+        if [ ! -f "sitemap.xml" ]; then
+          echo "Sitemap file not found, treating as new file"
+          echo "changed=true" >> $GITHUB_OUTPUT
+        elif git diff --quiet HEAD -- sitemap.xml 2>/dev/null; then
+          echo "No changes detected in sitemap.xml"
+          echo "changed=false" >> $GITHUB_OUTPUT
+        else
+          echo "Changes detected in sitemap.xml"
+          echo "changed=true" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "Final git status:"
+        git status --porcelain
+        echo "Changed value: $(grep changed $GITHUB_OUTPUT || echo 'not found')"
+    
+    - name: Commit sitemap changes
+      run: |
+        git config --local user.email "sitemap-generator-bot-action@github.com"
+        git config --local user.name "Sitemap Generator"
+        
+        echo "Git status before add:"
+        git status --porcelain
+        
+        git add sitemap.xml
+        
+        echo "Git status after add:"
+        git status --porcelain
+        
+        if git diff --cached --quiet; then
+          echo "No staged changes to commit"
+        else
+          echo "Committing changes..."
+          git commit -m "[SITEMAP] 🔗 ${{ steps.sitemap.outputs.url-count }} URLs found. Updated sitemap.xml in root directory."
+          git push
+        fi
