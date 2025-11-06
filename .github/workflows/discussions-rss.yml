@@ -32,16 +32,12 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           OUTPUT_DIR: docs/feeds
         run: |
-          node - <<'EOF'
+          node --input-type=module - <<'EOF'
           import fs from "fs";
           import path from "path";
-          import { fileURLToPath } from "url";
-          import { createRequire } from "module";
           import RSS from "rss";
           import slugify from "slugify";
           import { graphql } from "@octokit/graphql";
-
-          const require = createRequire(import.meta.url);
 
           const token = process.env.GITHUB_TOKEN;
           const repoFull = process.env.GITHUB_REPOSITORY;
@@ -152,11 +148,12 @@ jobs:
                 console.log(`Generated ${filePath} (${items.length} items)`);
               }
             } catch (err) {
-              console.error("Error:", err);
+              console.error(" Error:", err);
               process.exit(1);
             }
           })();
           EOF
+
 
       - name: Commit and push changes
         run: |
