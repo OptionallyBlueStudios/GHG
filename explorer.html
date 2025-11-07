@@ -534,7 +534,7 @@
         // Main loader
         async function loadExplorer() {
             try {
-                const res = await fetch('/sitemap.xml', { cache: 'no-store' });
+                const res = await fetch('sitemap.xml', { cache: 'no-store' });
                 if (!res.ok) throw new Error('Failed to fetch sitemap.xml');
                 
                 const xmlText = await res.text();
