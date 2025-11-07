@@ -405,6 +405,26 @@
     </footer>
 
     <script>
+        // Get the current URL
+        let url = window.location.href;
+        
+        // Remove .html if present
+        url = url.replace(/\.html$/, "");
+        
+        // Replace /posts/ with /rss/
+        url = url.replace("/posts/", "/rss/");
+        
+        // Remove the last segment after the final '/'
+        url = url.substring(0, url.lastIndexOf('/'));
+        
+        // Set the result as the href of the element with id "aelemtn"
+        const elem = document.getElementById("aelemtn");
+        if (elem) {
+          elem.href = url;
+          console.log("Set href to:", url);
+        } else {
+          console.warn("Element with id 'aelemtn' not found.");
+        }
         // Image lightbox functionality
         const lightbox = document.createElement('div');
         lightbox.id = 'lightbox-overlay';
