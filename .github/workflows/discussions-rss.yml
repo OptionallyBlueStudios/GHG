@@ -30,12 +30,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          OUTPUT_DIR: rss/feeds
+          OUTPUT_DIR: docs/feeds
         run: |
           node --input-type=module - <<'EOF'
           import fs from "fs";
           import path from "path";
-          import RSS from "rss";
+          import RSS from "docs/feeds";
           import slugify from "slugify";
           import { graphql } from "@octokit/graphql";
 
