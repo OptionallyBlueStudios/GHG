@@ -4,9 +4,9 @@
         <description><![CDATA[RSS feed for Test Posts/Category1 discussions]]></description>
         <link>https://github.com/OptionallyBlueStudios/GHG/discussions</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 07 Nov 2025 07:44:21 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 07 Nov 2025 18:04:04 GMT</lastBuildDate>
         <atom:link href="https://optionallybluestudios.github.io/GHG/rss/test-posts/category1.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Fri, 07 Nov 2025 07:44:21 GMT</pubDate>
+        <pubDate>Fri, 07 Nov 2025 18:04:04 GMT</pubDate>
         <item>
             <title><![CDATA[Test sections and sitemap work]]></title>
             <description><![CDATA[<p dir="auto">hi</p>

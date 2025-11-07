@@ -4,9 +4,9 @@
         <description><![CDATA[RSS feed for GHG/Announcements discussions]]></description>
         <link>https://github.com/OptionallyBlueStudios/GHG/discussions</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 07 Nov 2025 07:44:21 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 07 Nov 2025 18:04:04 GMT</lastBuildDate>
         <atom:link href="https://optionallybluestudios.github.io/GHG/rss/ghg/announcements.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Fri, 07 Nov 2025 07:44:21 GMT</pubDate>
+        <pubDate>Fri, 07 Nov 2025 18:04:04 GMT</pubDate>
         <item>
             <title><![CDATA[GHG Is Now Open To The Communtiy!]]></title>
             <description><![CDATA[<p dir="auto">After developing GHG to the point where it is ready for production, we have opened it up to the community! This post explains more about it.</p>
@@ -21,12 +21,13 @@
 <li>Try to keep your grammar and spelling good</li>
 <li>Minimum 50 words per article (WPA)</li>
 <li>The same rules from any community apply to this one</li>
-<li>No discrimination<br>
+<li>No discrimination</li>
+<li>You must disclose the author of the post and all credits in the post<br>
 This is subject to change. We have no way of updating you when this happens easily.</li>
 </ul>]]></description>
             <link>https://optionallybluestudios.github.io/GHG/posts/ghg/announcements/4.html</link>
             <guid isPermaLink="false">D_kwDOQPQH184AiwLq</guid>
-            <pubDate>Wed, 05 Nov 2025 19:49:19 GMT</pubDate>
+            <pubDate>Fri, 07 Nov 2025 16:16:11 GMT</pubDate>
         </item>
     </channel>
 </rss>
