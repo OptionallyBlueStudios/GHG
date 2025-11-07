@@ -149,6 +149,7 @@ jobs:
               for (const [category, items] of Object.entries(byCat)) {
                 const xml = generateFeed(category, items);
                 const filePath = path.join(outputDir, `${toSlugPath(category)}.xml`);
+                fs.mkdirSync(path.dirname(filePath), { recursive: true }); // ✅ FIXED
                 fs.writeFileSync(filePath, xml, "utf8");
                 console.log(`✅ Generated ${filePath} (${items.length} items)`);
               }
