@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GHG - Category Explorer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: #0a0e14;
+            font-family: 'Courier New', monospace;
+            color: #00ff41;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        header {
+            background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
+            border-bottom: 2px solid #00ff41;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 4px 20px rgba(0, 255, 65, 0.1);
+        }
+        .header-content { max-width: 1200px; margin: 0 auto; display:flex; justify-content:space-between; align-items:center; }
+        .logo-section h1 { color:#00ff41; font-size:1.8rem; font-weight:700; text-shadow:0 0 10px rgba(0,255,65,0.5); letter-spacing:2px;}
+        .logo-section h1::before { content:"root@"; color:#ff0055; }
+        .logo-section p { color: #6c7a89; font-size:0.9rem; margin-top:0.3rem; }
+        nav { display:flex; gap:2rem; }
+        nav a { color:#00ff41; text-decoration:none; padding:0.5rem 1rem; border:1px solid transparent; transition:all .3s ease; font-size:0.95rem; }
+        nav a:hover { border:1px solid #00ff41; background:rgba(0,255,65,0.1); box-shadow:0 0 15px rgba(0,255,65,0.3); }
+
+        .container {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Breadcrumb navigation */
+        .breadcrumb {
+            color: #6c7a89;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        .breadcrumb a {
+            color: #00d4ff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .breadcrumb a:hover {
+            color: #00ff41;
+            text-decoration: underline;
+        }
+        .breadcrumb span {
+            color: #00ff41;
+        }
+
+        /* File explorer container */
+        .explorer-container {
+            background: #0f1419;
+            border: 1px solid #1a1f2e;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .explorer-header {
+            background: #1a1f2e;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #00ff41;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .explorer-header h2 {
+            color: #00ff41;
+            font-size: 1.2rem;
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+        }
+
+        .explorer-header::before {
+            content: "📁";
+            font-size: 1.5rem;
+        }
+
+        /* Folder/File list */
+        .explorer-content {
+            padding: 1.5rem;
+        }
+
+        .explorer-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.5rem;
+            background: #0a0e14;
+            border: 1px solid #1a1f2e;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            gap: 1rem;
+        }
+
+        .explorer-item:hover {
+            border-color: #00ff41;
+            background: rgba(0, 255, 65, 0.05);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+            transform: translateX(5px);
+        }
+
+        .explorer-item.folder::before {
+            content: "📂";
+            font-size: 1.5rem;
+        }
+
+        .explorer-item.file::before {
+            content: "📄";
+            font-size: 1.5rem;
+        }
+
+        .item-info {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-name {
+            color: #00ff41;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .item-count {
+            color: #6c7a89;
+            font-size: 0.9rem;
+        }
+
+        .item-meta {
+            display: flex;
+            gap: 2rem;
+            color: #6c7a89;
+            font-size: 0.85rem;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c7a89;
+        }
+
+        .empty-state::before {
+            content: "🔍";
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #6c7a89;
+            font-size: 1rem;
+        }
+
+        .loading::before {
+            content: "⏳";
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 1rem;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #0f1419;
+            border: 1px solid #1a1f2e;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stat-label {
+            color: #6c7a89;
+            font-size: 0.85rem;
+        }
+
+        .stat-value {
+            color: #ff0055;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        footer {
+            background: #0f1419;
+            border-top: 2px solid #00ff41;
+            padding: 2rem;
+            text-align: center;
+            color: #6c7a89;
+            margin-top: 4rem;
+        }
+        footer a { color: #00d4ff; text-decoration: none; }
+        footer a:hover { color: #00ff41; text-shadow: 0 0 8px rgba(0, 255, 65, 0.5); }
+
+        @media (max-width: 768px) {
+            .header-content { flex-direction: column; gap: 1rem; text-align: center; }
+            nav { flex-direction: column; gap: 0.5rem; }
+            .stats-bar { flex-direction: column; gap: 1rem; }
+            .item-meta { flex-direction: column; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>GHG</h1>
+                <p>// THE Game Hacking Guide</p>
+            </div>
+            <nav>
+                <a href="index">[ HOME ]</a>
+                <a href="index#posts">[ POSTS ]</a>
+                <a href="index#about">[ ABOUT ]</a>
+                <a href="/tools/">[ TOOLS ]</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="breadcrumb" class="breadcrumb">
+            <a href="/">home</a> / <a href="explorer/">explorer</a>
+        </div>
+
+        <div id="stats-bar" class="stats-bar" style="display: none;">
+            <div class="stat-item">
+                <span class="stat-label">Total Categories</span>
+                <span class="stat-value" id="total-categories">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Total Posts</span>
+                <span class="stat-value" id="total-posts">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Current View</span>
+                <span class="stat-value" id="current-view">Root</span>
+            </div>
+        </div>
+
+        <div class="explorer-container">
+            <div class="explorer-header">
+                <h2 id="explorer-title">Loading...</h2>
+            </div>
+            <div class="explorer-content" id="explorer-content">
+                <div class="loading">Loading file structure from sitemap.xml...</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 GHG - The Game Hacking Guide | Powered by <a href="https://github.com/StuffzEZ/DisBlog">DisBlog</a></p>
+        <p style="margin-top:0.5rem; font-size:0.85rem;">For educational purposes only. Always obtain proper authorization.</p>
+    </footer>
+
+    <script>
+    (function() {
+        const explorerContent = document.getElementById('explorer-content');
+        const explorerTitle = document.getElementById('explorer-title');
+        const breadcrumb = document.getElementById('breadcrumb');
+        const statsBar = document.getElementById('stats-bar');
+        const totalCategoriesEl = document.getElementById('total-categories');
+        const totalPostsEl = document.getElementById('total-posts');
+        const currentViewEl = document.getElementById('current-view');
+
+        // Parse URL parameters
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                category: params.get('category') || null,
+                subCategory: params.get('sub-category') || null
+            };
+        }
+
+        // Update URL without reload
+        function updateUrl(category, subCategory) {
+            const params = new URLSearchParams();
+            if (category) params.set('category', category);
+            if (subCategory) params.set('sub-category', subCategory);
+            const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+            window.history.pushState({}, '', newUrl);
+        }
+
+        // Parse sitemap XML
+        function parseSitemap(xmlText) {
+            try {
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(xmlText, "application/xml");
+                const urls = Array.from(xml.getElementsByTagName('url'));
+                return urls.map(u => {
+                    const locEl = u.getElementsByTagName('loc')[0];
+                    const lastmodEl = u.getElementsByTagName('lastmod')[0];
+                    return {
+                        loc: locEl ? locEl.textContent.trim() : null,
+                        lastmod: lastmodEl ? lastmodEl.textContent.trim() : null
+                    };
+                }).filter(e => e.loc && e.loc.includes('/posts/'));
+            } catch (e) {
+                console.error('Sitemap parse error:', e);
+                return [];
+            }
+        }
+
+        // Build hierarchical structure from URLs
+        function buildStructure(entries) {
+            const structure = {};
+            
+            entries.forEach(entry => {
+                try {
+                    const url = new URL(entry.loc, window.location.origin);
+                    const pathPart = url.pathname.split('/posts/')[1];
+                    if (!pathPart) return;
+                    
+                    const segments = pathPart.split('/').filter(Boolean);
+                    if (segments.length === 0) return;
+
+                    const category = segments[0];
+                    const subCategory = segments[1] || null;
+                    const fileName = segments[segments.length - 1];
+
+                    if (!structure[category]) {
+                        structure[category] = { posts: [], subCategories: {} };
+                    }
+
+                    if (subCategory && segments.length > 2) {
+                        if (!structure[category].subCategories[subCategory]) {
+                            structure[category].subCategories[subCategory] = { posts: [] };
+                        }
+                        structure[category].subCategories[subCategory].posts.push({
+                            name: fileName,
+                            url: entry.loc,
+                            lastmod: entry.lastmod
+                        });
+                    } else if (segments.length === 2) {
+                        structure[category].posts.push({
+                            name: fileName,
+                            url: entry.loc,
+                            lastmod: entry.lastmod
+                        });
+                    }
+                } catch (e) {
+                    console.warn('Error processing entry:', entry, e);
+                }
+            });
+
+            return structure;
+        }
+
+        // Pretty print names
+        function prettifyName(name) {
+            return name
+        }
+
+        // Update breadcrumb
+        function updateBreadcrumb(category, subCategory) {
+            let html = '<a href="/">home</a> / <a href="?">explorer</a>';
+            
+            if (category) {
+                html += ` / <a href="?category=${encodeURIComponent(category)}">${prettifyName(category)}</a>`;
+            }
+            
+            if (subCategory) {
+                html += ` / <span>${prettifyName(subCategory)}</span>`;
+            }
+            
+            breadcrumb.innerHTML = html;
+        }
+
+        // Render root view (all categories)
+        function renderRoot(structure) {
+            explorerTitle.textContent = '/';
+            currentViewEl.textContent = '/';
+            
+            const categories = Object.keys(structure).sort();
+            
+            if (categories.length === 0) {
+                explorerContent.innerHTML = '<div class="empty-state">No categories found in sitemap.xml</div>';
+                return;
+            }
+
+            let html = '';
+            categories.forEach(cat => {
+                const data = structure[cat];
+                const subCatCount = Object.keys(data.subCategories).length;
+                const postCount = data.posts.length;
+                const totalItems = subCatCount + postCount;
+
+                html += `
+                    <div class="explorer-item folder" onclick="navigateToCategory('${cat}')">
+                        <div class="item-info">
+                            <span class="item-name">${prettifyName(cat) + "/"}</span>
+                            <span class="item-count">${totalItems} item${totalItems !== 1 ? 's' : ''}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            explorerContent.innerHTML = html;
+        }
+
+        // Render category view (subcategories + posts)
+        function renderCategory(structure, category) {
+            const data = structure[category];
+            if (!data) {
+                explorerContent.innerHTML = '<div class="empty-state">Category not found</div>';
+                return;
+            }
+
+            explorerTitle.textContent = "/" + category + "/"
+            currentViewEl.textContent = "/" + category + "/"
+
+            const subCategories = Object.keys(data.subCategories).sort();
+            const posts = data.posts;
+
+            let html = '';
+
+            // Subcategories first
+            subCategories.forEach(subCat => {
+                const subData = data.subCategories[subCat];
+                const postCount = subData.posts.length;
+
+                html += `
+                    <div class="explorer-item folder" onclick="navigateToSubCategory('${category}', '${subCat}')">
+                        <div class="item-info">
+                            <span class="item-name">${prettifyName(subCat) + "/"}</span>
+                            <span class="item-count">${postCount} post${postCount !== 1 ? 's' : ''}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Then posts
+            posts.forEach(post => {
+                html += `
+                    <div class="explorer-item file" onclick="window.location.href='${post.url}'">
+                        <div class="item-info">
+                            <span class="item-name">${prettifyName(post.name)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (html === '') {
+                html = '<div class="empty-state">This category is empty</div>';
+            }
+
+            explorerContent.innerHTML = html;
+        }
+
+        // Render subcategory view (just posts)
+        function renderSubCategory(structure, category, subCategory) {
+            const data = structure[category]?.subCategories[subCategory];
+            if (!data) {
+                explorerContent.innerHTML = '<div class="empty-state">Subcategory not found</div>';
+                return;
+            }
+
+            explorerTitle.textContent = "/" + category + "/" + subCategory + "/"
+            currentViewEl.textContent = "/" + category + "/" + subCategory + "/"
+
+            const posts = data.posts;
+
+            let html = '';
+            posts.forEach(post => {
+                html += `
+                    <div class="explorer-item file" onclick="window.location.href='${post.url}'">
+                        <div class="item-info">
+                            <span class="item-name">${prettifyName(post.name)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (html === '') {
+                html = '<div class="empty-state">This subcategory is empty</div>';
+            }
+
+            explorerContent.innerHTML = html;
+        }
+
+        // Navigation functions
+        window.navigateToCategory = function(category) {
+            updateUrl(category, null);
+            const { category: cat } = getUrlParams();
+            updateBreadcrumb(cat, null);
+            renderCategory(window.sitemapStructure, cat);
+        };
+
+        window.navigateToSubCategory = function(category, subCategory) {
+            updateUrl(category, subCategory);
+            const params = getUrlParams();
+            updateBreadcrumb(params.category, params.subCategory);
+            renderSubCategory(window.sitemapStructure, params.category, params.subCategory);
+        };
+
+        // Calculate stats
+        function updateStats(structure) {
+            const categoryCount = Object.keys(structure).length;
+            let postCount = 0;
+
+            Object.values(structure).forEach(cat => {
+                postCount += cat.posts.length;
+                Object.values(cat.subCategories).forEach(subCat => {
+                    postCount += subCat.posts.length;
+                });
+            });
+
+            totalCategoriesEl.textContent = categoryCount;
+            totalPostsEl.textContent = postCount;
+            statsBar.style.display = 'flex';
+        }
+
+        // Main loader
+        async function loadExplorer() {
+            try {
+                const res = await fetch('/sitemap.xml', { cache: 'no-store' });
+                if (!res.ok) throw new Error('Failed to fetch sitemap.xml');
+                
+                const xmlText = await res.text();
+                const entries = parseSitemap(xmlText);
+                const structure = buildStructure(entries);
+                
+                window.sitemapStructure = structure;
+                
+                updateStats(structure);
+
+                const params = getUrlParams();
+                updateBreadcrumb(params.category, params.subCategory);
+
+                if (params.subCategory) {
+                    renderSubCategory(structure, params.category, params.subCategory);
+                } else if (params.category) {
+                    renderCategory(structure, params.category);
+                } else {
+                    renderRoot(structure);
+                }
+
+            } catch (error) {
+                console.error('Error loading explorer:', error);
+                explorerContent.innerHTML = '<div class="empty-state">Failed to load sitemap.xml. Please make sure it exists at /sitemap.xml</div>';
+            }
+        }
+
+        // Handle browser back/forward
+        window.addEventListener('popstate', () => {
+            const params = getUrlParams();
+            updateBreadcrumb(params.category, params.subCategory);
+            
+            if (params.subCategory) {
+                renderSubCategory(window.sitemapStructure, params.category, params.subCategory);
+            } else if (params.category) {
+                renderCategory(window.sitemapStructure, params.category);
+            } else {
+                renderRoot(window.sitemapStructure);
+            }
+        });
+
+        // Start
+        loadExplorer();
+    })();
+    </script>
+</body>
+</html>
