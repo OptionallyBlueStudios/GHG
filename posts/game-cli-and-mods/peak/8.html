@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GHG | How to mod PEAK (EASY METHOD)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0e14;
+            font-family: 'Courier New', monospace;
+            color: #00ff41;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Terminal-style header */
+        header {
+            background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
+            border-bottom: 2px solid #00ff41;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 4px 20px rgba(0, 255, 65, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section h1 {
+            color: #00ff41;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .logo-section h1::before {
+            content: "root@";
+            color: #ff0055;
+        }
+
+        .logo-section p {
+            color: #6c7a89;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: #00ff41;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        nav a:hover {
+            border: 1px solid #00ff41;
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+        }
+
+        /* Main content container */
+        .container {
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Breadcrumb navigation */
+        .breadcrumb {
+            color: #6c7a89;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .breadcrumb a {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Post metadata */
+        .post-meta {
+            background: #0f1419;
+            border-left: 4px solid #ff0055;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 4px;
+        }
+
+        .post-meta h1 {
+            color: #00ff41;
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+            text-shadow: 0 0 8px rgba(0, 255, 65, 0.4);
+        }
+
+        .post-info {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            color: #6c7a89;
+            font-size: 0.9rem;
+        }
+
+        .post-info span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .post-info span::before {
+            content: "▸";
+            color: #00ff41;
+        }
+
+        /* Main content area */
+        .content-wrapper {
+            background: #0f1419;
+            border: 1px solid #1a1f2e;
+            border-radius: 8px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            margin-bottom: 2rem;
+        }
+
+        #maincontent-forpost {
+            color: #d4d4d4;
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        #maincontent-forpost h1,
+        #maincontent-forpost h2,
+        #maincontent-forpost h3 {
+            color: #00ff41;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+        }
+
+        #maincontent-forpost h1 { font-size: 1.8rem; }
+        #maincontent-forpost h2 { font-size: 1.5rem; }
+        #maincontent-forpost h3 { font-size: 1.2rem; }
+
+        #maincontent-forpost a {
+            color: #00d4ff;
+            text-decoration: none;
+            border-bottom: 1px dashed #00d4ff;
+            transition: all 0.3s ease;
+        }
+
+        #maincontent-forpost a:hover {
+            color: #00ff41;
+            border-bottom-color: #00ff41;
+            text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+        }
+
+        #maincontent-forpost code {
+            background: #000;
+            color: #ff0055;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        #maincontent-forpost pre {
+            background: #000;
+            border-left: 4px solid #00ff41;
+            padding: 1.5rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: inset 0 0 20px rgba(0, 255, 65, 0.1);
+        }
+
+        #maincontent-forpost pre code {
+            background: transparent;
+            color: #00ff41;
+            padding: 0;
+        }
+
+        #maincontent-forpost blockquote {
+            background: #1a1f2e;
+            border-left: 4px solid #ff0055;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            color: #a0a0a0;
+            font-style: italic;
+        }
+
+        #maincontent-forpost ul,
+        #maincontent-forpost ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        #maincontent-forpost li {
+            margin: 0.5rem 0;
+            color: #d4d4d4;
+        }
+
+        #maincontent-forpost img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            border: 1px solid #1a1f2e;
+            margin: 1.5rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #maincontent-forpost img:hover {
+            border-color: #00ff41;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+            transform: scale(1.02);
+        }
+
+        /* Warning/Info boxes */
+        .warning {
+            background: rgba(255, 0, 85, 0.1);
+            border-left: 4px solid #ff0055;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .info {
+            background: rgba(0, 212, 255, 0.1);
+            border-left: 4px solid #00d4ff;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        /* Comments section */
+        .comments-section {
+            background: #0f1419;
+            border: 1px solid #1a1f2e;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .comments-section h2 {
+            color: #00ff41;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            background: #0f1419;
+            border-top: 2px solid #00ff41;
+            padding: 2rem;
+            text-align: center;
+            color: #6c7a89;
+            margin-top: 4rem;
+        }
+
+        footer a {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: #00ff41;
+            text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+        }
+
+        /* Lightbox */
+        #lightbox-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            cursor: pointer;
+        }
+
+        #lightbox-overlay img {
+            max-width: 90vw;
+            max-height: 90vh;
+            border: 2px solid #00ff41;
+            border-radius: 4px;
+            box-shadow: 0 0 50px rgba(0, 255, 65, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .content-wrapper {
+                padding: 1.5rem;
+            }
+
+            .post-meta h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>GHG</h1>
+                <p>// THE Game Hacking Guide</p>
+            </div>
+            <nav>
+                <a href="/GHG/">[ HOME ]</a>
+                <a href="/GHG/#posts">[ POSTS ]</a>
+                <a href="/GHG/#tools">[ TOOLS ]</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="/">home</a> / <a href="/posts/">posts</a> / <span>Game CLI And Mods / PEAK / How to mod PEAK (EASY METHOD) ( #{{discussion.id}} )</span>
+        </div>
+
+        <div class="post-meta">
+            <h1 id="title-forpost">How to mod PEAK (EASY METHOD)</h1>
+            <div class="post-info">
+                <span>Post #8</span>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            <div id="maincontent-forpost">
+                <p>Hello and welcome to GHG, THE game hacking guide. In this tutorial, you will learn how to mod PEAK (but the easy way).</p>
+<h1>Step 1: Getting r2ModMan</h1>
+<p>Before we can start modding PEAK, we need to get r2ModMan to make modding easier. Whilst r2ModMan is fine for this, you can also use Gale or our mod manager which is going to release later this month (November 2025- you can get it when we release a post in the tools category). To install r2ModMan, go to its <a href="https://thunderstore.io/package/ebkr/r2modman/versions/">download page on Thunderstore and download the latest version</a>. After this open the EXE and then you can continue with step 2 once it’s installed.</p>
+<h1>Step 2: Finding and installing your mods</h1>
+<p>Now, you need to get your mods. You can do this by searching for PEAK and pressing Select Game on the main screen. After this, click Install Mods and search for the mod you want. If you want a console, install AdvancedConsole.</p>
+<h1>WARNING</h1>
+<p>On Thunderstore, some mods CAN CONTAIN VIRUSES. The best way to not install a virus is installing mods with HIGH download counts and ones that were NOT recently created.</p>
+<p>This is an Official GHG post<br>GNU GPLv3 License<br>Written By: StuffzEZ (GHG Staff/Owner)</p>
+
+            </div>
+        </div>
+
+        <div class="comments-section">
+            <h2>&gt;_ Comments</h2>
+            <script src="https://giscus.app/client.js"
+                data-repo="OptionallyBlueStudios/GHG"
+                data-repo-id=""
+                data-category=""
+                data-category-id=""
+                data-mapping="number"
+                data-term="8"
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-input-position="top"
+                data-theme="dark"
+                data-lang="en"
+                crossorigin="anonymous"
+                async>
+            </script>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 GHG | Powered by <a href="https://github.com/StuffzEZ/DisBlog">DisBlog</a></p>
+        <p>Get this page's <a id="aelemtn">RSS Feed</a></p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">For educational purposes only. Always obtain proper authorization.</p>
+    </footer>
+
+    <script>
+        // Get the current URL
+        let url = window.location.href;
+        
+        // Remove .html if present
+        url = url.replace(/\.html$/, "");
+        
+        // Replace /posts/ with /rss/
+        url = url.replace("/posts/", "/rss/");
+        
+        // Remove the last segment after the final '/'
+        url = url.substring(0, url.lastIndexOf('/'));
+        
+        // Set the result as the href of the element with id "aelemtn"
+        const elem = document.getElementById("aelemtn");
+        if (elem) {
+          elem.href = url;
+          console.log("Set href to:", url);
+        } else {
+          console.warn("Element with id 'aelemtn' not found.");
+        }
+        // Image lightbox functionality
+        const lightbox = document.createElement('div');
+        lightbox.id = 'lightbox-overlay';
+        const lightboxImg = document.createElement('img');
+        lightboxImg.alt = 'Full Image';
+        lightbox.appendChild(lightboxImg);
+        document.body.appendChild(lightbox);
+
+        // Add click handlers to all images in content
+        document.addEventListener('DOMContentLoaded', () => {
+            const contentImages = document.querySelectorAll('#maincontent-forpost img');
+            contentImages.forEach(img => {
+                img.addEventListener('click', () => {
+                    lightbox.style.display = 'flex';
+                    lightboxImg.src = img.src;
+                });
+            });
+
+            lightbox.addEventListener('click', () => {
+                lightbox.style.display = 'none';
+                lightboxImg.src = '';
+            });
+        });
+    </script>
+</body>
+</html>
